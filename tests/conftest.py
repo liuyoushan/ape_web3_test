@@ -24,6 +24,13 @@ from tests.fixtures.dex_fixture import (
     pair_with_liquidity
 )
 
+# Contract Custom 测试 fixtures
+from tests.fixtures.contract_custom_fixture import (
+    contract_custom_test_data,
+    myerc20_token,
+    role_constants
+)
+
 
 @pytest.fixture(scope="session")
 def deployer(accounts):

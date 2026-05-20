@@ -7,12 +7,12 @@ case_018_admin_permission:
   token_symbol: "TT"
 
 case_019_global_parameter_rw:
-  # 预留全局参数配置
-  pass
+  initial_message: "Hello ApeWorX!"
+  first_update_message: "First Update Message"
+  second_update_message: "Second Update Message"
 
 case_020_custom_business_logic:
-  # 预留业务逻辑配置
-  pass
+  amount_in_ether: 200
 
 case_021_pause_unpause:
   # 预留暂停配置

@@ -14,7 +14,7 @@ from ape import project
 # 测试目标：仅指定 owner/admin 可调用，非权限地址调用强制报错
 # 测试类型：P0 - 权限测试
 # ================================================================================
-def test_custom_018_admin_permission_check(deployer, user1, user2):
+def test_custom_018_admin_permission_check(deployer, user1, user2, myerc20_token, role_constants):
     """
     管理员权限接口校验
 
@@ -24,13 +24,14 @@ def test_custom_018_admin_permission_check(deployer, user1, user2):
     - ADMIN_ROLE：仅该角色可 grant/revoke
     - 普通用户调用以上接口 revert
     """
-    token = deployer.deploy(project.MyERC20, "TestToken", "TT")
+    token = myerc20_token
 
-    MINTER_ROLE = token.MINTER_ROLE()
-    PAUSER_ROLE = token.PAUSER_ROLE()
-    ADMIN_ROLE = token.ADMIN_ROLE()
+    MINTER_ROLE = role_constants["MINTER_ROLE"]
+    PAUSER_ROLE = role_constants["PAUSER_ROLE"]
+    ADMIN_ROLE = role_constants["ADMIN_ROLE"]
 
     print("\n[DEBUG] ========== 角色常量校验 ==========")
+    print(f"  - token 名从 yaml 读取: {token.name()}")
     print(f"  - deployer 是初始 ADMIN/MINTER/PAUSER: {deployer.address}")
 
     # ==================== 场景1：deployer 有所有角色，调用成功 ====================
@@ -84,16 +85,52 @@ def test_custom_018_admin_permission_check(deployer, user1, user2):
 # 测试目标：费率、开关、阈值等自定义变量，修改 + 读取双向断言
 # 测试类型：P0 - 功能测试
 # ================================================================================
-def test_custom_019_global_parameter_rw(deployer):
+def test_custom_019_global_parameter_rw(deployer, contract_custom_test_data):
     """
     自定义全局参数读写测试
 
-    验证合约参数管理：
-    - 参数可读可写
-    - 修改后立即生效
-    - 参数值与设置一致
+    验证合约参数管理（经典 set/get 模式）：
+    - 初始构造器值正确读取
+    - set 修改后立即生效
+    - 多轮修改: 读取值 = 写入值 （双向断言）
     """
-    raise NotImplementedError("用例待实现")
+    data = contract_custom_test_data["case_019_global_parameter_rw"]
+
+    hello = deployer.deploy(project.HelloWorld)
+
+    INITIAL_MSG = data["initial_message"]
+    FIRST_UPDATE = data["first_update_message"]
+    SECOND_UPDATE = data["second_update_message"]
+
+    print("\n[DEBUG] ========== 参数配置（从yaml读取） ==========")
+    print(f"  - 合约初始常量: {INITIAL_MSG}")
+    print(f"  - 第一次更新: {FIRST_UPDATE}")
+    print(f"  - 第二次更新: {SECOND_UPDATE}")
+
+    # ==================== 断言1：构造器初始值 ====================
+    print("\n[DEBUG] ========== 阶段1: 初始值读取 ==========")
+    actual_initial = hello.message()
+    assert actual_initial == INITIAL_MSG, \
+        f"初始值不匹配: 期望 {INITIAL_MSG}, 实际 {actual_initial}"
+    print(f"  - 初始值正确: {actual_initial}")
+
+    # ==================== 断言2：第一次 set ====================
+    print("\n[DEBUG] ========== 阶段2: 第一次修改 + 回读 ==========")
+    hello.setMessage(FIRST_UPDATE, sender=deployer)
+    actual_after_first = hello.message()
+    assert actual_after_first == FIRST_UPDATE, \
+        f"第一次修改不匹配: 期望 {FIRST_UPDATE}, 实际 {actual_after_first}"
+    print(f"  - 第一次回读正确: {actual_after_first}")
+
+    # ==================== 断言3：第二次 set ====================
+    print("\n[DEBUG] ========== 阶段3: 第二次修改 + 回读 ==========")
+    hello.setMessage(SECOND_UPDATE, sender=deployer)
+    actual_after_second = hello.message()
+    assert actual_after_second == SECOND_UPDATE, \
+        f"第二次修改不匹配: 期望 {SECOND_UPDATE}, 实际 {actual_after_second}"
+    print(f"  - 第二次回读正确: {actual_after_second}")
+
+    print("\n[DEBUG] ✓ 全局参数读写双向断言通过")
 
 
 # ================================================================================
@@ -101,16 +138,59 @@ def test_custom_019_global_parameter_rw(deployer):
 # 测试目标：定制化计算、资产分发、数据统计等独有函数逻辑校验
 # 测试类型：P1 - 业务逻辑测试
 # ================================================================================
-def test_custom_020_custom_business_logic(deployer, user1):
+def test_custom_020_custom_business_logic(deployer, contract_custom_test_data, project):
     """
-    项目独有业务接口测试
+    项目独有业务接口测试 - 定制化计算公式验证
 
-    验证自定义业务逻辑：
-    - 特殊计算公式正确
-    - 资产分发规则正确
-    - 数据统计准确
+    业务函数：MiniSwapRouter.getAmountOut
+    - Uniswap 风格定制化公式：扣除 0.3% 手续费后计算输出
+    - 公式：amountInWithFee = amountIn × 997
+    - 测试点：公式逻辑准确、与模块内其他用例风格统一
     """
-    raise NotImplementedError("用例待实现")
+    from tests.helpers.formatters import parse_ether
+
+    data = contract_custom_test_data["case_020_custom_business_logic"]
+    swap_amount_ether = data["amount_in_ether"]
+    swap_amount = parse_ether(str(swap_amount_ether))
+
+    print("\n[DEBUG] ========== 配置（从yaml读取） ==========")
+    print(f"  - 兑换输入: {swap_amount_ether} ether")
+    print(f"  - 业务公式: 0.3%手续费 = input × 997 / 1000")
+
+    factory = project.MiniSwapFactory.deploy(sender=deployer)
+    router = project.MiniSwapRouter.deploy(factory, sender=deployer)
+    tokenA = project.MyERC20.deploy("TokenA", "TKA", sender=deployer)
+    tokenB = project.MyERC20.deploy("TokenB", "TKB", sender=deployer)
+    add_amt = parse_ether("5000")
+
+    tokenA.mint(deployer, add_amt * 2, sender=deployer)
+    tokenB.mint(deployer, add_amt * 2, sender=deployer)
+    tokenA.approve(router, add_amt * 2, sender=deployer)
+    tokenB.approve(router, add_amt * 2, sender=deployer)
+    router.addLiquidity(tokenA, tokenB, add_amt, add_amt, deployer, sender=deployer)
+
+    (reserve0, reserve1) = project.MiniSwapPair.at(factory.getPair(tokenA, tokenB)).getReserves()
+    (reserveIn, reserveOut) = (reserve0, reserve1) if tokenA.address < tokenB.address else (reserve1, reserve0)
+    print(f"  - 池内储备: {reserveIn/1e18} / {reserveOut/1e18}")
+
+    # ==================== 阶段：getAmountOut 公式逻辑验证 ====================
+    print("\n[DEBUG] ========== 阶段: getAmountOut 计算验证 ==========")
+
+    amount_out_chain = router.getAmountOut(swap_amount, tokenA.address, tokenB.address)
+    print(f"  - 链上 Router.getAmountOut: {amount_out_chain / 1e18:.6f} TokenB")
+
+    amountInWithFee = swap_amount * 997
+    numerator = amountInWithFee * reserveOut
+    denominator = reserveIn * 1000 + amountInWithFee
+    expected_local = numerator // denominator
+
+    print(f"  - 本地公式复算结果: {expected_local / 1e18:.6f} TokenB")
+    assert amount_out_chain == expected_local, \
+        f"计算不匹配: 期望 {expected_local/1e18}, 实际 {amount_out_chain/1e18}"
+
+    print(f"  ✓ 计算公式一致: amountOut = reserveOut × (amountIn×997) / (reserveIn×1000 + amountIn×997)")
+
+    print("\n[DEBUG] ✓ 项目定制化计算函数逻辑验证通过")
 
 
 # ================================================================================
