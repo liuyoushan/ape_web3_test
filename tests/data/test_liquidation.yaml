@@ -1,0 +1,30 @@
+"""
+==============================================================================
+清算业务测试数据配置
+==============================================================================
+"""
+case_048_liquidation_trigger:
+  health_factor_warning: 1.2
+  health_factor_liquidation: 1.0
+  collateral_ratio_initial: 1.5
+  debt_amount: 1000
+  collateral_amount: 2000
+
+case_049_normal_liquidation:
+  liquidator_reward_pct: 0.1
+  platform_fee_pct: 0.02
+  debt_amount: 1000
+  expected_liquidator_reward: 100
+
+case_052_liquidation_reward:
+  bonus_pct: 0.1
+  platform_tax_pct: 0.02
+  platform_address: "0x1111111111111111111111111111111111111111
+
+case_053_batch_liquidation:
+  user_count: 3
+  total_debt: 3000
+
+case_054_price_oracle_manipulation:
+  oracle_fake_price_high: 2.0
+  oracle_fake_price_low: 0.5

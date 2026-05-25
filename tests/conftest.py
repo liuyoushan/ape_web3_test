@@ -31,6 +31,12 @@ from tests.fixtures.contract_custom_fixture import (
     role_constants
 )
 
+# 清算业务测试 fixtures
+from tests.fixtures.liquidation_fixture import (
+    liquidation_test_data,
+    liquidation_constants
+)
+
 
 @pytest.fixture(scope="session")
 def deployer(accounts):
