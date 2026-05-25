@@ -13,6 +13,7 @@
     >>> from tests.helpers.logger import get_logger, log
     >>> log.debug("状态: %s", "ok")      # 蓝色  [DEBUG]
     >>> log.info("步骤完成")              # 绿色  [INFO]
+    >>> log.success("操作成功")            # 绿色  [INFO]
     >>> log.warning("边界情况")           # 黄色  [WARNING]
     >>> log.error("异常发生")             # 红色  [ERROR]
 
@@ -166,6 +167,10 @@ class _LogProxy:
         self._logger().debug(msg, *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
+        self._logger().info(msg, *args, **kwargs)
+
+    def success(self, msg, *args, **kwargs):
+        """成功日志（使用 INFO 级别，带绿色输出）"""
         self._logger().info(msg, *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):

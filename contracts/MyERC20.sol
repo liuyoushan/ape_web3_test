@@ -98,7 +98,7 @@ contract MyERC20 {
         emit Transfer(from, address(0), amount);
     }
 
-    function transfer(address to, uint256 amount) external returns (bool) {
+    function transfer(address to, uint256 amount) external whenNotPaused returns (bool) {
         balanceOf[msg.sender] -= amount;
         balanceOf[to] += amount;
         emit Transfer(msg.sender, to, amount);

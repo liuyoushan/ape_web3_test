@@ -2,8 +2,8 @@
 # ERC20 测试数据
 # ==============================================================================
 common:
-  token_name: "TestToken"
-  token_symbol: "TTK"
+  token_name: "MyToken"
+  token_symbol: "MTK"
   expected_decimals: 18
   expected_initial_supply: 0
 

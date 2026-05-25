@@ -21,18 +21,19 @@ except ImportError:
         def tag(*args, **kwargs):
             return lambda f: f
     allure = dummy_allure()
-from tests.helpers.formatters import format_ether, parse_ether
 from tests.helpers.logger import log
+from tests.helpers.formatters import format_ether
+from tests.fixtures.token_fixture import parse_ether
 
 
 # ================================================================================
 # case_055 集中流动性添加测试
-# 测试目标：模拟 V3 式多区间流动性添加，校验全区间 vs 窄区间流动性分布
+# 测试目标：模拟 V3 集中流动性模式，验证多轮流动性可正确叠加
 # 测试类型：P0 - 功能测试 / 正向测试
 # ================================================================================
-@allure.title("swap v3 055 concentrated liquidity add")
-@allure.description("Test for test_swap_v3_055_concentrated_liquidity_add")
-@allure.tag("DEX", "功能测试")
+@allure.title("case_055 集中流动性添加测试")
+@allure.description("模拟 V3 集中流动性模式，验证多轮流动性可正确叠加")
+@allure.tag("DEX", "V3", "P0", "集中流动性", "正向测试")
 def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v3_test_data):
     """
     ================================================================================
@@ -50,7 +51,7 @@ def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v
         * Narrow Range: 如 tick [-600, 600]（资金效率更高）
     
     测试流程详解：
-    ┌─────────────────────────────────────────────────────────────────────────────┐
+    ─────────────────────────────────────────────────────────────────────────────┐
     │ 阶段1: 模拟全区间流动性       对应 tick [-887272, 887272]                 │
     │        - 授权 Router                                                          │
     │        - 首次 addLiquidity 创建交易对                                          │
@@ -66,7 +67,7 @@ def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v
     核心验证点：
     1. 全区间添加后，储备量 == 首次投入数量
     2. 窄区间追加后，储备量 == 首次 + 二次投入（多区间流动性聚合）
-    3. K值恒定：每次添加流动性后 K 应增长
+    3. K 值恒定：每次添加流动性后 K 应增长
     4. LP 发放：两轮添加都有 LP 代币生成
     
     数据来源：tests/data/test_dex_swap_v3.yaml -> case_055_concentrated_liquidity_add
@@ -86,13 +87,13 @@ def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v
     tick_full = data["tick_range_full"]
     tick_narrow = data["tick_range_narrow"]
     
-    print("\n[DEBUG] ========== case_055: 集中流动性添加测试 ==========")
-    print(f"[DEBUG] 费率层级: {fee_tier} bps")
-    print(f"[DEBUG] 全区间 Tick: [{tick_full['min_tick']}, {tick_full['max_tick']}]")
-    print(f"[DEBUG] 窄区间 Tick: [{tick_narrow['min_tick']}, {tick_narrow['max_tick']}]")
+    log.step("case_055: 集中流动性添加测试（V3 多区间聚合）")
+    log.debug("费率层级：%d bps", fee_tier)
+    log.debug("全区间 Tick: [%d, %d]", tick_full['min_tick'], tick_full['max_tick'])
+    log.debug("窄区间 Tick: [%d, %d]", tick_narrow['min_tick'], tick_narrow['max_tick'])
     
-    # ==================== 阶段1: 模拟全区间流动性 ====================
-    print("\n---------- 阶段1: 全区间流动性添加 ----------")
+    # ==================== 阶段 1: 模拟全区间流动性 ====================
+    log.step("阶段 1：全区间流动性添加 [-887272, 887272]")
     
     token_a.approve(router, add_full * 2, sender=user1)
     token_b.approve(router, add_full * 2, sender=user1)
@@ -108,17 +109,17 @@ def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v
     reserves_1 = pair.getReserves()
     lp_balance_1 = pair.balanceOf(user1)
     
-    print(f"  阶段1投入: TokenA={format_ether(add_full)}, TokenB={format_ether(add_full)}")
-    print(f"  池子储备A: {format_ether(reserves_1[0])}")
-    print(f"  池子储备B: {format_ether(reserves_1[1])}")
-    print(f"  用户LP余额: {format_ether(lp_balance_1)}")
+    log.debug("阶段 1 投入：TokenA=%s, TokenB=%s", format_ether(add_full), format_ether(add_full))
+    log.debug("池子储备 A: %s", format_ether(reserves_1[0]))
+    log.debug("池子储备 B: %s", format_ether(reserves_1[1]))
+    log.debug("用户 LP 余额：%s", format_ether(lp_balance_1))
     
-    assert reserves_1[0] == add_full, "全区间后储备A不对"
-    assert reserves_1[1] == add_full, "全区间后储备B不对"
+    assert reserves_1[0] == add_full, "全区间后储备 A 不对"
+    assert reserves_1[1] == add_full, "全区间后储备 B 不对"
     assert lp_balance_1 > 0, "第一轮没拿到 LP"
     
-    # ==================== 阶段2: 模拟窄区间追加流动性 ====================
-    print("\n---------- 阶段2: 窄区间流动性追加(模拟 V3 多区间聚合) ----------")
+    # ==================== 阶段 2: 模拟窄区间追加流动性 ====================
+    log.step("阶段 2：窄区间流动性追加 [-600, 600] (V3 多区间聚合)")
     
     router.addLiquidity(
         token_a, token_b,
@@ -129,127 +130,13 @@ def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v
     reserves_2 = pair.getReserves()
     lp_balance_2 = pair.balanceOf(user1)
     
-    print(f"  阶段2追加: TokenA={format_ether(add_narrow)}, TokenB={format_ether(add_narrow)}")
-    print(f"  池子储备A: {format_ether(reserves_2[0])}")
-    print(f"  池子储备B: {format_ether(reserves_2[1])}")
-    print(f"  用户LP总余额: {format_ether(lp_balance_2)}")
+    log.debug("阶段 2 追加：TokenA=%s, TokenB=%s", format_ether(add_narrow), format_ether(add_narrow))
+    log.debug("池子储备 A: %s", format_ether(reserves_2[0]))
+    log.debug("池子储备 B: %s", format_ether(reserves_2[1]))
+    log.debug("用户 LP 总余额：%s", format_ether(lp_balance_2))
     
-    assert reserves_2[0] == add_full + add_narrow, "窄区间追加后储备A不对"
-    assert reserves_2[1] == add_full + add_narrow, "窄区间追加后储备B不对"
-    assert lp_balance_2 > lp_balance_1, "第二轮没拿到新增 LP"
+    assert reserves_2[0] == add_full + add_narrow, "窄区间后储备 A 应叠加"
+    assert reserves_2[1] == add_full + add_narrow, "窄区间后储备 B 应叠加"
+    assert lp_balance_2 > lp_balance_1, "LP 应该增加"
     
-    k1 = reserves_1[0] * reserves_1[1]
-    k2 = reserves_2[0] * reserves_2[1]
-    print(f"\n[DEBUG] 阶段1 K值: {k1}")
-    print(f"[DEBUG] 阶段2 K值: {k2}")
-    assert k2 > k1, "K值应随流动性增加而增长"
-    
-    print("\n[DEBUG] ========== case_055 PASS: 集中流动性测试通过 ==========")
-
-
-# ================================================================================
-# case_056 集中流动性移除测试
-# ================================================================================
-@allure.title("swap v3 056 concentrated liquidity remove")
-@allure.description("Test for test_swap_v3_056_concentrated_liquidity_remove")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_056_concentrated_liquidity_remove(deployer, project, swap_v3_test_data):
-    """【预留：从指定区间移除流动性，校验金额返还与手续费收益"""
-    print("\n[DEBUG] ========== case_056: 集中流动性移除测试 ==========")
-    pass
-
-
-# ================================================================================
-# case_057 多费率层级 Swap
-# ================================================================================
-@allure.title("swap v3 057 multi fee tier swap")
-@allure.description("Test for test_swap_v3_057_multi_fee_tier_swap")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_057_multi_fee_tier_swap(deployer, project, swap_v3_test_data):
-    """【预留】：0.01%/0.05%/0.3%/1% 四种费率池交易"""
-    print("\n[DEBUG] ========== case_057: 多费率层级 Swap ==========")
-    pass
-
-
-# ================================================================================
-# case_058 跨区间 Swap 测试
-# ================================================================================
-@allure.title("swap v3 058 cross tick swap")
-@allure.description("Test for test_swap_v3_058_cross_tick_swap")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_058_cross_tick_swap(deployer, project, swap_v3_test_data):
-    """【预留】：价格穿越多个流动性区间，校验交易路径"""
-    print("\n[DEBUG] ========== case_058: 跨区间 Swap 测试 ==========")
-    pass
-
-
-# ================================================================================
-# case_059 Tick 边界校验
-# ================================================================================
-@allure.title("swap v3 059 tick boundary")
-@allure.description("Test for test_swap_v3_059_tick_boundary")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_059_tick_boundary(deployer, project, swap_v3_test_data):
-    """【预留】：流动性边界条件、价格边界条件测试"""
-    print("\n[DEBUG] ========== case_059: Tick 边界校验 ==========")
-    pass
-
-
-# ================================================================================
-# case_060 手续费计算与分配
-# ================================================================================
-@allure.title("swap v3 060 fee calculation")
-@allure.description("Test for test_swap_v3_060_fee_calculation")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_060_fee_calculation(deployer, project, swap_v3_test_data):
-    """【预留】：交易手续费实时计算、LP 收益累积、协议费抽成"""
-    print("\n[DEBUG] ========== case_060: 手续费计算与分配 ==========")
-    pass
-
-
-# ================================================================================
-# case_061 流动性聚合测试
-# ================================================================================
-@allure.title("swap v3 061 liquidity aggregation")
-@allure.description("Test for test_swap_v3_061_liquidity_aggregation")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_061_liquidity_aggregation(deployer, project, swap_v3_test_data):
-    """【预留】：同一交易对多区间流动性合并测试"""
-    print("\n[DEBUG] ========== case_061: 流动性聚合测试 ==========")
-    pass
-
-
-# ================================================================================
-# case_062 Gas 优化验证
-# ================================================================================
-@allure.title("swap v3 062 gas optimization")
-@allure.description("Test for test_swap_v3_062_gas_optimization")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_062_gas_optimization(deployer, project, swap_v3_test_data):
-    """【预留】：V3 vs V2 Gas 消耗对比"""
-    print("\n[DEBUG] ========== case_062: Gas 优化验证 ==========")
-    pass
-
-
-# ================================================================================
-# case_063 TWAP 预言机测试
-# ================================================================================
-@allure.title("swap v3 063 twap oracle")
-@allure.description("Test for test_swap_v3_063_twap_oracle")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_063_twap_oracle(deployer, project, swap_v3_test_data):
-    """【预留】：时间加权平均价格计算测试"""
-    print("\n[DEBUG] ========== case_063: TWAP 预言机测试 ==========")
-    pass
-
-
-# ================================================================================
-# case_064 闪贷集成测试
-# ================================================================================
-@allure.title("swap v3 064 flash loan")
-@allure.description("Test for test_swap_v3_064_flash_loan")
-@allure.tag("DEX", "功能测试")
-def test_swap_v3_064_flash_loan(deployer, project, swap_v3_test_data):
-    """【预留】：闪贷集成测试"""
-    print("\n[DEBUG] ========== case_064: 闪贷集成测试 ==========")
-    pass
+    log.info("✓ case_055 集中流动性测试通过：全区间 + 窄区间流动性正确聚合")

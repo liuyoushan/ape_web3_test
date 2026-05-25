@@ -65,3 +65,12 @@ def eth_amount():
     def _eth(amount):
         return amount * 10**18
     return _eth
+
+
+@pytest.fixture(scope="function")
+def token_with_balance(token, deployer, erc20_test_data):
+    """有初始余额的 token（每个函数重置）"""
+    data = erc20_test_data["case_002_transfer"]
+    mint_amount = int(float(data["mint_amount"].replace(" ether", "")) * 10**18)
+    token.mint(deployer, mint_amount, sender=deployer)
+    return token
