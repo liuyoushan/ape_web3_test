@@ -4,6 +4,21 @@
 ==============================================================================
 """
 import pytest
+try:
+    import allure
+except ImportError:
+    # Dummy decorators if allure not installed
+    class dummy_allure:
+        @staticmethod
+        def title(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def description(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def tag(*args, **kwargs):
+            return lambda f: f
+    allure = dummy_allure()
 
 
 # ================================================================================
@@ -11,6 +26,9 @@ import pytest
 # 测试目标：抵押率低于预警线/强平线，校验清算可触发
 # 测试类型：P0
 # ================================================================================
+@allure.title("048 liquidation trigger condition")
+@allure.description("Test for test_048_liquidation_trigger_condition")
+@allure.tag("功能测试")
 def test_048_liquidation_trigger_condition(deployer, user1, liquidation_test_data):
     """
     清算触发条件测试
@@ -28,6 +46,9 @@ def test_048_liquidation_trigger_condition(deployer, user1, liquidation_test_dat
 # 测试目标：清算人执行清算，抵押资产被扣除、债务偿还
 # 测试类型：P0
 # ================================================================================
+@allure.title("049 normal liquidation workflow")
+@allure.description("Test for test_049_normal_liquidation_workflow")
+@allure.tag("功能测试")
 def test_049_normal_liquidation_workflow(deployer, user1, user2, liquidation_test_data):
     """
     正常清算流程测试
@@ -46,6 +67,9 @@ def test_049_normal_liquidation_workflow(deployer, user1, user2, liquidation_tes
 # 测试目标：用户债务清零、抵押品扣除、清算奖励发放
 # 测试类型：P0
 # ================================================================================
+@allure.title("050 post liquidation state check")
+@allure.description("Test for test_050_post_liquidation_state_check")
+@allure.tag("功能测试")
 def test_050_post_liquidation_state_check(deployer, user1, user2, liquidation_test_data):
     """
     清算后状态校验
@@ -64,6 +88,9 @@ def test_050_post_liquidation_state_check(deployer, user1, user2, liquidation_te
 # 测试目标：健康仓位无法被清算，校验 revert
 # 测试类型：P0
 # ================================================================================
+@allure.title("051 non liquidation condition reject")
+@allure.description("Test for test_051_non_liquidation_condition_reject")
+@allure.tag("功能测试")
 def test_051_non_liquidation_condition_reject(deployer, user1, liquidation_test_data):
     """
     非清算条件拒绝测试
@@ -80,6 +107,9 @@ def test_051_non_liquidation_condition_reject(deployer, user1, liquidation_test_
 # 测试目标：清算收益、平台抽成比例正确性
 # 测试类型：P0
 # ================================================================================
+@allure.title("052 liquidation reward calculation")
+@allure.description("Test for test_052_liquidation_reward_calculation")
+@allure.tag("功能测试")
 def test_052_liquidation_reward_calculation(deployer, user1, user2, liquidation_test_data):
     """
     清算奖励/罚金计算测试
@@ -97,6 +127,9 @@ def test_052_liquidation_reward_calculation(deployer, user1, user2, liquidation_
 # 测试目标：多用户同时触发清算，资产不冲突、不超额
 # 测试类型：P0
 # ================================================================================
+@allure.title("053 batch liquidation scenario")
+@allure.description("Test for test_053_batch_liquidation_scenario")
+@allure.tag("功能测试")
 def test_053_batch_liquidation_scenario(deployer, user1, user2, user3, liquidation_test_data):
     """
     批量清算场景测试
@@ -114,6 +147,9 @@ def test_053_batch_liquidation_scenario(deployer, user1, user2, user3, liquidati
 # 测试目标：恶意价格无法非法清算正常用户
 # 测试类型：P0
 # ================================================================================
+@allure.title("054 price oracle manipulation boundary")
+@allure.description("Test for test_054_price_oracle_manipulation_boundary")
+@allure.tag("功能测试")
 def test_054_price_oracle_manipulation_boundary(deployer, user1, liquidation_test_data):
     """
     价格预言机操纵边界测试

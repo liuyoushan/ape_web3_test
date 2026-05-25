@@ -7,6 +7,21 @@
 """
 
 from ape import project
+try:
+    import allure
+except ImportError:
+    # Dummy decorators if allure not installed
+    class dummy_allure:
+        @staticmethod
+        def title(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def description(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def tag(*args, **kwargs):
+            return lambda f: f
+    allure = dummy_allure()
 from tests.helpers.formatters import parse_ether
 
 
@@ -15,6 +30,9 @@ from tests.helpers.formatters import parse_ether
 # 测试目标：仅指定 owner/admin 可调用，非权限地址调用强制报错
 # 测试类型：P0 - 权限测试
 # ================================================================================
+@allure.title("custom 018 admin permission check")
+@allure.description("Test for test_custom_018_admin_permission_check")
+@allure.tag("功能测试")
 def test_custom_018_admin_permission_check(deployer, user1, user2, myerc20_token, role_constants):
     """
     管理员权限接口校验
@@ -86,6 +104,9 @@ def test_custom_018_admin_permission_check(deployer, user1, user2, myerc20_token
 # 测试目标：费率、开关、阈值等自定义变量，修改 + 读取双向断言
 # 测试类型：P0 - 功能测试
 # ================================================================================
+@allure.title("custom 019 global parameter rw")
+@allure.description("Test for test_custom_019_global_parameter_rw")
+@allure.tag("功能测试")
 def test_custom_019_global_parameter_rw(deployer, contract_custom_test_data):
     """
     自定义全局参数读写测试
@@ -139,6 +160,9 @@ def test_custom_019_global_parameter_rw(deployer, contract_custom_test_data):
 # 测试目标：定制化计算、资产分发、数据统计等独有函数逻辑校验
 # 测试类型：P1 - 业务逻辑测试
 # ================================================================================
+@allure.title("custom 020 custom business logic")
+@allure.description("Test for test_custom_020_custom_business_logic")
+@allure.tag("功能测试")
 def test_custom_020_custom_business_logic(deployer, contract_custom_test_data, project):
     """
     项目独有业务接口测试 - 定制化计算公式验证
@@ -203,6 +227,9 @@ def test_custom_020_custom_business_logic(deployer, contract_custom_test_data, p
 # 测试目标：Pause 锁停核心业务、Unpause 恢复功能，状态隔离校验
 # 测试类型：P0 - 状态测试
 # ================================================================================
+@allure.title("custom 021 pause unpause")
+@allure.description("Test for test_custom_021_pause_unpause")
+@allure.tag("功能测试")
 def test_custom_021_pause_unpause(deployer, user1, project):
     """
     合约暂停/恢复功能测试
@@ -271,6 +298,9 @@ def test_custom_021_pause_unpause(deployer, user1, project):
 # 测试目标：名单内地址特权、名单外地址功能限制 / 拦截校验
 # 测试类型：P0 - 权限测试
 # ================================================================================
+@allure.title("custom 022 blacklist whitelist")
+@allure.description("Test for test_custom_022_blacklist_whitelist")
+@allure.tag("功能测试")
 def test_custom_022_blacklist_whitelist(deployer, user1, user2, contract_custom_test_data, project):
     """
     黑白名单控制接口测试
@@ -328,6 +358,9 @@ def test_custom_022_blacklist_whitelist(deployer, user1, user2, contract_custom_
 # 测试目标：后台调整手续费、奖励比例、质押系数等参数生效校验
 # 测试类型：P0 - 配置测试
 # ================================================================================
+@allure.title("custom 023 dynamic parameter update")
+@allure.description("Test for test_custom_023_dynamic_parameter_update")
+@allure.tag("功能测试")
 def test_custom_023_dynamic_parameter_update(deployer, contract_custom_test_data, project):
     """
     动态参数修改接口测试
@@ -387,6 +420,9 @@ def test_custom_023_dynamic_parameter_update(deployer, contract_custom_test_data
 # 测试目标：预言机、外部池、跨合约读取数据的返回值容错校验
 # 测试类型：P1 - 集成测试
 # ================================================================================
+@allure.title("custom 024 external contract call")
+@allure.description("Test for test_custom_024_external_contract_call")
+@allure.tag("功能测试")
 def test_custom_024_external_contract_call(deployer, project, contract_custom_test_data):
     """
     外部合约依赖调用测试
@@ -465,6 +501,9 @@ def test_custom_024_external_contract_call(deployer, project, contract_custom_te
 # 测试目标：非法参数、不符合业务规则操作，校验定制化 revert 提示
 # 测试类型：P0 - 异常测试
 # ================================================================================
+@allure.title("custom 025 custom error revert")
+@allure.description("Test for test_custom_025_custom_error_revert")
+@allure.tag("功能测试")
 def test_custom_025_custom_error_revert(deployer, user1, project):
     """
     自定义业务异常拦截测试

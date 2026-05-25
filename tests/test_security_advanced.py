@@ -7,6 +7,21 @@
 """
 
 from ape import project
+try:
+    import allure
+except ImportError:
+    # Dummy decorators if allure not installed
+    class dummy_allure:
+        @staticmethod
+        def title(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def description(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def tag(*args, **kwargs):
+            return lambda f: f
+    allure = dummy_allure()
 
 
 # ================================================================================
@@ -14,6 +29,9 @@ from ape import project
 # 测试目标：无限授权风险、重复授权覆盖、授权过期/清零逻辑
 # 测试类型：P0 - 安全测试
 # ================================================================================
+@allure.title("security 024 approve security")
+@allure.description("Test for test_security_024_approve_security")
+@allure.tag("安全测试")
 def test_security_024_approve_security(deployer, user1):
     """
     授权安全高阶测试
@@ -31,6 +49,9 @@ def test_security_024_approve_security(deployer, user1):
 # 测试目标：批量转账、批量授权、批量白名单写入，批量数据一致性
 # 测试类型：P1 - 效率测试
 # ================================================================================
+@allure.title("security 025 batch operations")
+@allure.description("Test for test_security_025_batch_operations")
+@allure.tag("安全测试")
 def test_security_025_batch_operations(deployer, user1):
     """
     批量操作接口测试
@@ -48,6 +69,9 @@ def test_security_025_batch_operations(deployer, user1):
 # 测试目标：质押锁定、区块产出奖励、复利结算、解押解锁逻辑
 # 测试类型：P0 - DeFi 核心业务
 # ================================================================================
+@allure.title("security 026 staking mining")
+@allure.description("Test for test_security_026_staking_mining")
+@allure.tag("安全测试")
 def test_security_026_staking_mining(deployer, user1):
     """
     质押/挖矿收益测算测试
@@ -66,6 +90,9 @@ def test_security_026_staking_mining(deployer, user1):
 # 测试目标：依赖区块高度、时间戳的限时功能，边界时间节点校验
 # 测试类型：P0 - 时间敏感测试
 # ================================================================================
+@allure.title("security 027 timelock blocklock")
+@allure.description("Test for test_security_027_timelock_blocklock")
+@allure.tag("安全测试")
 def test_security_027_timelock_blocklock(deployer, user1):
     """
     时间锁/区块锁控制测试
@@ -84,6 +111,9 @@ def test_security_027_timelock_blocklock(deployer, user1):
 # 测试目标：关键资金接口重入场景模拟，校验防重入锁生效
 # 测试类型：P1 - 安全测试
 # ================================================================================
+@allure.title("security 028 reentrancy guard")
+@allure.description("Test for test_security_028_reentrancy_guard")
+@allure.tag("安全测试")
 def test_security_028_reentrancy_guard(deployer, user1):
     """
     重入攻击防护测试
@@ -101,6 +131,9 @@ def test_security_028_reentrancy_guard(deployer, user1):
 # 测试目标：大数、0值、极值运算，校验 Solidity 数值安全防护
 # 测试类型：P1 - 安全测试
 # ================================================================================
+@allure.title("security 029 integer overflow underflow")
+@allure.description("Test for test_security_029_integer_overflow_underflow")
+@allure.tag("安全测试")
 def test_security_029_integer_overflow_underflow(deployer):
     """
     整数溢出/下溢边界测试
@@ -118,6 +151,9 @@ def test_security_029_integer_overflow_underflow(deployer):
 # 测试目标：代理合约逻辑升级、数据存储不丢失、版本兼容
 # 测试类型：P1 - 升级测试
 # ================================================================================
+@allure.title("security 030 proxy upgrade")
+@allure.description("Test for test_security_030_proxy_upgrade")
+@allure.tag("安全测试")
 def test_security_030_proxy_upgrade(deployer):
     """
     合约升级代理测试
@@ -135,6 +171,9 @@ def test_security_030_proxy_upgrade(deployer):
 # 测试目标：全业务关键事件 Topic、参数、触发时机精准断言
 # 测试类型：P0 - 事件测试
 # ================================================================================
+@allure.title("security 031 event completeness")
+@allure.description("Test for test_security_031_event_completeness")
+@allure.tag("安全测试")
 def test_security_031_event_completeness(deployer, user1):
     """
     链上事件完整校验测试
@@ -153,6 +192,9 @@ def test_security_031_event_completeness(deployer, user1):
 # 测试目标：转账至零地址、销毁地址，校验拦截或合规处理
 # 测试类型：P1 - 安全测试
 # ================================================================================
+@allure.title("security 032 zero address guard")
+@allure.description("Test for test_security_032_zero_address_guard")
+@allure.tag("安全测试")
 def test_security_032_zero_address_guard(deployer):
     """
     零地址/黑洞地址防护测试
@@ -170,6 +212,9 @@ def test_security_032_zero_address_guard(deployer):
 # 测试目标：低Gas、超限Gas场景，交易失败数据回滚完整性
 # 测试类型：P1 - 异常测试
 # ================================================================================
+@allure.title("security 033 gas abnormal handling")
+@allure.description("Test for test_security_033_gas_abnormal_handling")
+@allure.tag("安全测试")
 def test_security_033_gas_abnormal_handling(deployer, user1):
     """
     Gas 与交易异常兼容测试
@@ -187,6 +232,9 @@ def test_security_033_gas_abnormal_handling(deployer, user1):
 # 测试目标：跨链资产映射、跨链调用参数格式校验
 # 测试类型：P1 - 跨链测试
 # ================================================================================
+@allure.title("security 034 cross chain adaptation")
+@allure.description("Test for test_security_034_cross_chain_adaptation")
+@allure.tag("安全测试")
 def test_security_034_cross_chain_adaptation(deployer):
     """
     多链/跨链适配基础测试
@@ -204,6 +252,9 @@ def test_security_034_cross_chain_adaptation(deployer):
 # 测试目标：授权→添加流动性→Swap→质押→提取收益 完整闭环流程
 # 测试类型：P0 - 全链路测试
 # ================================================================================
+@allure.title("security 035 full chain integration")
+@allure.description("Test for test_security_035_full_chain_integration")
+@allure.tag("安全测试")
 def test_security_035_full_chain_integration(deployer, user1):
     """
     集成全链路串联测试

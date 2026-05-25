@@ -6,6 +6,21 @@
 ==============================================================================
 """
 import math
+try:
+    import allure
+except ImportError:
+    # Dummy decorators if allure not installed
+    class dummy_allure:
+        @staticmethod
+        def title(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def description(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def tag(*args, **kwargs):
+            return lambda f: f
+    allure = dummy_allure()
 
 from ape import project
 from tests.helpers.formatters import format_ether, parse_ether
@@ -16,6 +31,9 @@ from tests.helpers.formatters import format_ether, parse_ether
 # 测试目标：TokenA 兑换 TokenB，校验余额、手续费、池子库存
 # 测试类型：P0 - 功能测试 / 正向测试
 # ================================================================================
+@allure.title("case_010 正向单池 Swap 兑换")
+@allure.description("TokenA 兑换 TokenB，校验余额、手续费、池子库存、K值守恒")
+@allure.tag("DEX", "P0", "功能测试", "Swap", "正向测试")
 def test_dex_010_swap_tokenA_to_tokenB(tokenA, tokenB, factory, router, deployer, user1, dex_test_data):
     """
     ================================================================================
@@ -134,6 +152,9 @@ def test_dex_010_swap_tokenA_to_tokenB(tokenA, tokenB, factory, router, deployer
 # 测试目标：TokenB 兑换 TokenA，校验价格换算逻辑一致性
 # 测试类型：P0 - 功能测试 / 正向测试
 # ================================================================================
+@allure.title("case_011 反向单池 Swap 兑换")
+@allure.description("TokenB 兑换 TokenA，校验价格换算逻辑一致性")
+@allure.tag("DEX", "P0", "Swap", "反向测试")
 def test_dex_011_swap_tokenB_to_tokenA(tokenA, tokenB, factory, router, deployer, user1, dex_test_data):
     """
     ================================================================================
@@ -232,6 +253,9 @@ def test_dex_011_swap_tokenB_to_tokenA(tokenA, tokenB, factory, router, deployer
 # 测试目标：存入双币种，Mint LP 凭证、校验池子储备量
 # 测试类型：P0 - 功能测试 / 正向测试
 # ================================================================================
+@allure.title("case_012 添加双边流动性测试")
+@allure.description("存入双币种，Mint LP 凭证、校验池子储备量")
+@allure.tag("DEX", "P0", "流动性", "AddLiquidity")
 def test_dex_012_add_liquidity(tokenA, tokenB, factory, router, deployer, user1, dex_test_data):
     """
     ================================================================================
@@ -337,6 +361,9 @@ def test_dex_012_add_liquidity(tokenA, tokenB, factory, router, deployer, user1,
 # 测试目标：双用户先后加池，验证 LP 按投入比例分发正确性
 # 测试类型：P0 - 逻辑验证 / 百分比核心测试
 # ================================================================================
+@allure.title("case_012_extend LP 占比校验")
+@allure.description("校验 LP 凭证持有占比与流动性贡献匹配")
+@allure.tag("DEX", "P0", "流动性", "LP")
 def test_dex_012_1_lp_percentage_check(tokenA, tokenB, factory, router, deployer, user1, user2, dex_test_data):
     """
     ================================================================================
@@ -426,6 +453,9 @@ def test_dex_012_1_lp_percentage_check(tokenA, tokenB, factory, router, deployer
 # 测试目标：销毁 LP 代币，赎回双资产，核对赎回数量
 # 测试类型：P0 - 功能测试 / 正向测试
 # ================================================================================
+@allure.title("case_013 移除流动性测试")
+@allure.description("销毁 LP 代币，赎回双资产，核对赎回数量")
+@allure.tag("DEX", "P0", "流动性", "RemoveLiquidity")
 def test_dex_013_remove_liquidity(tokenA, tokenB, factory, router, deployer, user1, dex_test_data):
     """
     ================================================================================
@@ -502,6 +532,9 @@ def test_dex_013_remove_liquidity(tokenA, tokenB, factory, router, deployer, use
 # 测试目标：极限滑点参数下，校验交易拦截/正常执行逻辑
 # 测试类型：P0 - 边界测试
 # ================================================================================
+@allure.title("case_014 滑点控制边界测试")
+@allure.description("极限滑点参数下，校验交易拦截/正常执行逻辑")
+@allure.tag("DEX", "P0", "滑点", "边界测试")
 def test_dex_014_slippage_control(tokenA, tokenB, factory, router, deployer, user1, dex_test_data):
     """
     ================================================================================
@@ -611,6 +644,9 @@ def test_dex_014_slippage_control(tokenA, tokenB, factory, router, deployer, use
 # 测试目标：交易手续费抽取、LP 分红、平台税分配校验
 # 测试类型：P0 - 财务测试
 # ================================================================================
+@allure.title("case_015 DEX 手续费结算测试")
+@allure.description("交易手续费抽取、LP 分红、平台税分配校验")
+@allure.tag("DEX", "P0", "手续费", "结算")
 def test_dex_015_fee_settlement(tokenA, tokenB, factory, router, deployer, user1, dex_test_data):
     """
     ================================================================================
@@ -727,6 +763,9 @@ def test_dex_015_fee_settlement(tokenA, tokenB, factory, router, deployer, user1
 # 测试目标：多跳路径兑换（A→C→B），校验路由调用与最终兑换量
 # 测试类型：P1 - 进阶测试
 # ================================================================================
+@allure.title("case_016 多路由跨池兑换测试")
+@allure.description("多跳路径兑换（A→C→B），校验路由调用与最终兑换量")
+@allure.tag("DEX", "P1", "多路由", "跨池")
 def test_dex_016_multi_hop_swap(deployer, user1, dex_test_data):
     """
     ================================================================================
@@ -824,6 +863,9 @@ def test_dex_016_multi_hop_swap(deployer, user1, dex_test_data):
 # 测试目标：超大额、接近池深限额交易，校验防砸盘、溢出防护
 # 测试类型：P1 - 边界测试
 # ================================================================================
+@allure.title("case_017 大额/极值交易边界测试")
+@allure.description("超大额、接近池深限额交易，校验防砸盘、溢出防护")
+@allure.tag("DEX", "P1", "大额交易", "边界")
 def test_dex_017_large_trade_boundary(deployer, user1, dex_test_data):
     """
     ================================================================================

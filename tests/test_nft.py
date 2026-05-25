@@ -7,6 +7,21 @@
 """
 
 from ape import project
+try:
+    import allure
+except ImportError:
+    # Dummy decorators if allure not installed
+    class dummy_allure:
+        @staticmethod
+        def title(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def description(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def tag(*args, **kwargs):
+            return lambda f: f
+    allure = dummy_allure()
 
 
 # ================================================================================
@@ -14,6 +29,9 @@ from ape import project
 # 测试目标：藏品名称、合约信息、唯一性规则、基础参数校验
 # 测试类型：P0 - NFT 基础测试
 # ================================================================================
+@allure.title("nft 036 erc721 metadata")
+@allure.description("Test for test_nft_036_erc721_metadata")
+@allure.tag("NFT", "功能测试")
 def test_nft_036_erc721_metadata(deployer):
     """
     ERC721 基础元数据校验测试
@@ -32,6 +50,9 @@ def test_nft_036_erc721_metadata(deployer):
 # 测试目标：白名单 mint、公售 mint、最大发行量封顶限制校验
 # 测试类型：P0 - 铸造测试
 # ================================================================================
+@allure.title("nft 037 nft limited mint")
+@allure.description("Test for test_nft_037_nft_limited_mint")
+@allure.tag("NFT", "功能测试")
 def test_nft_037_nft_limited_mint(deployer, user1):
     """
     NFT 限量铸造测试
@@ -50,6 +71,9 @@ def test_nft_037_nft_limited_mint(deployer, user1):
 # 测试目标：单枚 NFT 点对点转移，校验钱包地址持有权变更
 # 测试类型：P0 - 转账测试
 # ================================================================================
+@allure.title("nft 038 nft transfer")
+@allure.description("Test for test_nft_038_nft_transfer")
+@allure.tag("NFT", "功能测试")
 def test_nft_038_nft_transfer(deployer, user1):
     """
     NFT 独立转账持有测试
@@ -68,6 +92,9 @@ def test_nft_038_nft_transfer(deployer, user1):
 # 测试目标：单 NFT 授权、市场合约托管授权、批量授权校验
 # 测试类型：P1 - 授权测试
 # ================================================================================
+@allure.title("nft 039 erc721 approval")
+@allure.description("Test for test_nft_039_erc721_approval")
+@allure.tag("NFT", "功能测试")
 def test_nft_039_erc721_approval(deployer, user1):
     """
     ERC721 授权与委托测试
@@ -86,6 +113,9 @@ def test_nft_039_erc721_approval(deployer, user1):
 # 测试目标：链上销毁指定 TokenId，持有记录、总量数据清零
 # 测试类型：P1 - 销毁测试
 # ================================================================================
+@allure.title("nft 040 nft burn")
+@allure.description("Test for test_nft_040_nft_burn")
+@allure.tag("NFT", "功能测试")
 def test_nft_040_nft_burn(deployer, user1):
     """
     NFT 销毁逻辑测试
@@ -104,6 +134,9 @@ def test_nft_040_nft_burn(deployer, user1):
 # 测试目标：同 TokenId 道具数量统计、多品类资产隔离
 # 测试类型：P0 - SFT 基础测试
 # ================================================================================
+@allure.title("nft 041 erc1155 basic")
+@allure.description("Test for test_nft_041_erc1155_basic")
+@allure.tag("NFT", "功能测试")
 def test_nft_041_erc1155_basic(deployer):
     """
     ERC1155 半同质化基础校验测试
@@ -122,6 +155,9 @@ def test_nft_041_erc1155_basic(deployer):
 # 测试目标：游戏装备、消耗品批量增发与划转，数量精准校验
 # 测试类型：P0 - 批量操作测试
 # ================================================================================
+@allure.title("nft 042 sft batch transfer")
+@allure.description("Test for test_nft_042_sft_batch_transfer")
+@allure.tag("NFT", "功能测试")
 def test_nft_042_sft_batch_transfer(deployer, user1):
     """
     SFT 批量铸造/批量转账测试
@@ -140,6 +176,9 @@ def test_nft_042_sft_batch_transfer(deployer, user1):
 # 测试目标：道具挂单购买、点对点私下交易，资产扣减与交割校验
 # 测试类型：P0 - 游戏经济测试
 # ================================================================================
+@allure.title("nft 043 game item trade")
+@allure.description("Test for test_nft_043_game_item_trade")
+@allure.tag("NFT", "功能测试")
 def test_nft_043_game_item_trade(deployer, user1):
     """
     链游道具交易场景测试
@@ -158,6 +197,9 @@ def test_nft_043_game_item_trade(deployer, user1):
 # 测试目标：会员凭证、门票、游戏 buff，绑定持有状态鉴权校验
 # 测试类型：P1 - 权益测试
 # ================================================================================
+@allure.title("nft 044 sft benefit control")
+@allure.description("Test for test_nft_044_sft_benefit_control")
+@allure.tag("NFT", "功能测试")
 def test_nft_044_sft_benefit_control(deployer, user1):
     """
     权益类 SFT 权限控制测试
@@ -176,6 +218,9 @@ def test_nft_044_sft_benefit_control(deployer, user1):
 # 测试目标：图片、属性、权益元数据，前端展示与链上数据对齐
 # 测试类型：P1 - 数据一致性测试
 # ================================================================================
+@allure.title("nft 045 onchain offchain consistency")
+@allure.description("Test for test_nft_045_onchain_offchain_consistency")
+@allure.tag("NFT", "功能测试")
 def test_nft_045_onchain_offchain_consistency(deployer):
     """
     NFT/SFT 链上链下一致性测试

@@ -6,6 +6,21 @@
 ==============================================================================
 """
 from ape import project
+try:
+    import allure
+except ImportError:
+    # Dummy decorators if allure not installed
+    class dummy_allure:
+        @staticmethod
+        def title(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def description(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def tag(*args, **kwargs):
+            return lambda f: f
+    allure = dummy_allure()
 from tests.helpers.formatters import format_ether, parse_ether
 
 
@@ -14,6 +29,9 @@ from tests.helpers.formatters import format_ether, parse_ether
 # 测试目标：模拟 V3 式多区间流动性添加，校验全区间 vs 窄区间流动性分布
 # 测试类型：P0 - 功能测试 / 正向测试
 # ================================================================================
+@allure.title("swap v3 055 concentrated liquidity add")
+@allure.description("Test for test_swap_v3_055_concentrated_liquidity_add")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v3_test_data):
     """
     ================================================================================
@@ -131,6 +149,9 @@ def test_swap_v3_055_concentrated_liquidity_add(v3_liquidity_environment, swap_v
 # ================================================================================
 # case_056 集中流动性移除测试
 # ================================================================================
+@allure.title("swap v3 056 concentrated liquidity remove")
+@allure.description("Test for test_swap_v3_056_concentrated_liquidity_remove")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_056_concentrated_liquidity_remove(deployer, project, swap_v3_test_data):
     """【预留：从指定区间移除流动性，校验金额返还与手续费收益"""
     print("\n[DEBUG] ========== case_056: 集中流动性移除测试 ==========")
@@ -140,6 +161,9 @@ def test_swap_v3_056_concentrated_liquidity_remove(deployer, project, swap_v3_te
 # ================================================================================
 # case_057 多费率层级 Swap
 # ================================================================================
+@allure.title("swap v3 057 multi fee tier swap")
+@allure.description("Test for test_swap_v3_057_multi_fee_tier_swap")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_057_multi_fee_tier_swap(deployer, project, swap_v3_test_data):
     """【预留】：0.01%/0.05%/0.3%/1% 四种费率池交易"""
     print("\n[DEBUG] ========== case_057: 多费率层级 Swap ==========")
@@ -149,6 +173,9 @@ def test_swap_v3_057_multi_fee_tier_swap(deployer, project, swap_v3_test_data):
 # ================================================================================
 # case_058 跨区间 Swap 测试
 # ================================================================================
+@allure.title("swap v3 058 cross tick swap")
+@allure.description("Test for test_swap_v3_058_cross_tick_swap")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_058_cross_tick_swap(deployer, project, swap_v3_test_data):
     """【预留】：价格穿越多个流动性区间，校验交易路径"""
     print("\n[DEBUG] ========== case_058: 跨区间 Swap 测试 ==========")
@@ -158,6 +185,9 @@ def test_swap_v3_058_cross_tick_swap(deployer, project, swap_v3_test_data):
 # ================================================================================
 # case_059 Tick 边界校验
 # ================================================================================
+@allure.title("swap v3 059 tick boundary")
+@allure.description("Test for test_swap_v3_059_tick_boundary")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_059_tick_boundary(deployer, project, swap_v3_test_data):
     """【预留】：流动性边界条件、价格边界条件测试"""
     print("\n[DEBUG] ========== case_059: Tick 边界校验 ==========")
@@ -167,6 +197,9 @@ def test_swap_v3_059_tick_boundary(deployer, project, swap_v3_test_data):
 # ================================================================================
 # case_060 手续费计算与分配
 # ================================================================================
+@allure.title("swap v3 060 fee calculation")
+@allure.description("Test for test_swap_v3_060_fee_calculation")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_060_fee_calculation(deployer, project, swap_v3_test_data):
     """【预留】：交易手续费实时计算、LP 收益累积、协议费抽成"""
     print("\n[DEBUG] ========== case_060: 手续费计算与分配 ==========")
@@ -176,6 +209,9 @@ def test_swap_v3_060_fee_calculation(deployer, project, swap_v3_test_data):
 # ================================================================================
 # case_061 流动性聚合测试
 # ================================================================================
+@allure.title("swap v3 061 liquidity aggregation")
+@allure.description("Test for test_swap_v3_061_liquidity_aggregation")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_061_liquidity_aggregation(deployer, project, swap_v3_test_data):
     """【预留】：同一交易对多区间流动性合并测试"""
     print("\n[DEBUG] ========== case_061: 流动性聚合测试 ==========")
@@ -185,6 +221,9 @@ def test_swap_v3_061_liquidity_aggregation(deployer, project, swap_v3_test_data)
 # ================================================================================
 # case_062 Gas 优化验证
 # ================================================================================
+@allure.title("swap v3 062 gas optimization")
+@allure.description("Test for test_swap_v3_062_gas_optimization")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_062_gas_optimization(deployer, project, swap_v3_test_data):
     """【预留】：V3 vs V2 Gas 消耗对比"""
     print("\n[DEBUG] ========== case_062: Gas 优化验证 ==========")
@@ -194,6 +233,9 @@ def test_swap_v3_062_gas_optimization(deployer, project, swap_v3_test_data):
 # ================================================================================
 # case_063 TWAP 预言机测试
 # ================================================================================
+@allure.title("swap v3 063 twap oracle")
+@allure.description("Test for test_swap_v3_063_twap_oracle")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_063_twap_oracle(deployer, project, swap_v3_test_data):
     """【预留】：时间加权平均价格计算测试"""
     print("\n[DEBUG] ========== case_063: TWAP 预言机测试 ==========")
@@ -203,6 +245,9 @@ def test_swap_v3_063_twap_oracle(deployer, project, swap_v3_test_data):
 # ================================================================================
 # case_064 闪贷集成测试
 # ================================================================================
+@allure.title("swap v3 064 flash loan")
+@allure.description("Test for test_swap_v3_064_flash_loan")
+@allure.tag("DEX", "功能测试")
 def test_swap_v3_064_flash_loan(deployer, project, swap_v3_test_data):
     """【预留】：闪贷集成测试"""
     print("\n[DEBUG] ========== case_064: 闪贷集成测试 ==========")

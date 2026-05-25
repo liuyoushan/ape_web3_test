@@ -5,6 +5,21 @@ ERC20 同质化代币 基础标准用例
 """
 
 import pytest
+try:
+    import allure
+except ImportError:
+    # Dummy decorators if allure not installed
+    class dummy_allure:
+        @staticmethod
+        def title(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def description(*args, **kwargs):
+            return lambda f: f
+        @staticmethod
+        def tag(*args, **kwargs):
+            return lambda f: f
+    allure = dummy_allure()
 from ape.exceptions import ContractLogicError, VirtualMachineError
 from tests.helpers.assertions import (
     assert_token_metadata,
@@ -22,6 +37,9 @@ from tests.fixtures.token_fixture import mint_token, parse_ether
 # 测试目标：MyERC20 合约的元数据（名称、符号、小数位数、初始总发行量）
 # 测试类型：P0 - 功能测试 / 正向测试
 # ==============================================================================
+@allure.title("case_001 代币基础信息校验")
+@allure.description("验证 MyERC20 合约的元数据：名称、符号、小数位数、初始总发行量")
+@allure.tag("ERC20", "P0", "功能测试")
 def test_erc20_001_metadata_verification(token, erc20_test_data):
     """
     代币基础信息校验测试
@@ -44,6 +62,9 @@ def test_erc20_001_metadata_verification(token, erc20_test_data):
 # 测试目标：普通地址间转账，校验余额变更、链上事件、交易状态
 # 测试类型：P0 - 功能测试 / 正向测试
 # ==============================================================================
+@allure.title("case_002 正常转账功能测试")
+@allure.description("普通地址间转账，校验余额变更、链上事件、交易状态")
+@allure.tag("ERC20", "P0", "功能测试", "转账")
 def test_erc20_002_normal_transfer(token, deployer, user1, erc20_test_data):
     """
     正常转账功能测试
@@ -80,6 +101,9 @@ def test_erc20_002_normal_transfer(token, deployer, user1, erc20_test_data):
     assert_transfer_event(receipt, deployer.address, user1.address, transfer_amount)
 
 
+@allure.title("case_002_extend 反向转账测试")
+@allure.description("基于正向转账，测试 deployer->user1 后再 user1->deployer 的反向转账流程")
+@allure.tag("ERC20", "P0", "功能测试", "转账", "反向测试")
 def test_erc20_002_normal_transfer_002(token, deployer, user1):
     """
     基于 test_erc20_002_normal_transfer 延伸一下，反向转账
@@ -126,6 +150,9 @@ def test_erc20_002_normal_transfer_002(token, deployer, user1):
 # 测试目标：发起超额转账，校验合约 revert、数据不回写
 # 测试类型：P0 - 异常测试 / 负向测试
 # ==============================================================================
+@allure.title("case_003 余额不足异常转账测试")
+@allure.description("发起超额转账，校验合约 revert 机制、转账失败后数据不回写")
+@allure.tag("ERC20", "P0", "异常测试", "负向测试", "余额不足")
 def test_erc20_003_insufficient_balance_transfer(token, deployer, user1):
     """
     余额不足异常转账测试
@@ -173,6 +200,9 @@ def test_erc20_003_insufficient_balance_transfer(token, deployer, user1):
 # 测试目标：对第三方地址/合约授权，校验授权额度存储值
 # 测试类型：P0 - 功能测试 / 正向测试
 # ==============================================================================
+@allure.title("case_004 Approve 授权基础测试")
+@allure.description("对第三方地址/合约授权，校验授权额度存储值、Approval 事件")
+@allure.tag("ERC20", "P0", "功能测试", "授权", "Approve")
 def test_erc20_004_approve_authorization(token, deployer, user1, erc20_test_data):
     """
     Approve 授权基础测试
@@ -201,6 +231,9 @@ def test_erc20_004_approve_authorization(token, deployer, user1, erc20_test_data
 # 测试目标：授权后第三方扣币划转，校验余额、授权额度扣减
 # 测试类型：P0 - 功能测试 / 正向测试
 # ==============================================================================
+@allure.title("case_005 TransferFrom 代付转账测试")
+@allure.description("授权后第三方扣币划转，校验余额变化、授权额度扣减")
+@allure.tag("ERC20", "P0", "功能测试", "授权", "TransferFrom")
 def test_erc20_005_transfer_from(token, deployer, user1, user2, erc20_test_data):
     """
     TransferFrom 代付转账测试
@@ -306,6 +339,9 @@ def test_erc20_005_transfer_from(token, deployer, user1, user2, erc20_test_data)
 # 测试目标：权限账户增发代币，校验总量、目标地址余额
 # 测试类型：P0 - 功能测试 / 正向测试
 # ==============================================================================
+@allure.title("case_006 管理员铸币 Mint 测试")
+@allure.description("权限账户增发代币，校验总量、目标地址余额")
+@allure.tag("ERC20", "P0", "铸币", "权限")
 def test_erc20_006_mint_tokens(token, deployer, user1, erc20_test_data):
     """
     管理员铸币 Mint 测试
@@ -367,6 +403,9 @@ def test_erc20_006_mint_tokens(token, deployer, user1, erc20_test_data):
 # 测试目标：用户自主销毁、授权销毁，校验通缩总量与余额
 # 测试类型：P0 - 功能测试 / 正向测试
 # ==============================================================================
+@allure.title("case_007 代币销毁 Burn 测试")
+@allure.description("用户自主销毁、授权销毁，校验通缩总量与余额")
+@allure.tag("ERC20", "P0", "销毁", "Burn")
 def test_erc20_007_burn_tokens(token, deployer, user1, user2, erc20_test_data):
     """
     代币销毁 Burn 测试
@@ -450,6 +489,9 @@ def test_erc20_007_burn_tokens(token, deployer, user1, user2, erc20_test_data):
 # 测试目标：Minter/Pauser/Admin 角色分离，权限分配与校验
 # 测试类型：P1 - 进阶测试 / 权限测试
 # ==============================================================================
+@allure.title("case_008 RBAC 多角色权限测试")
+@allure.description("Minter/Pauser/Admin 角色分离，权限分配与校验")
+@allure.tag("ERC20", "P1", "权限", "RBAC")
 def test_erc20_008_rbac_role_control(token, deployer, user1, user2, user3):
     """
     RBAC 多角色权限控制测试
@@ -564,6 +606,9 @@ def test_erc20_008_rbac_role_control(token, deployer, user1, user2, user3):
 # 测试目标：Minter 角色铸币、Pauser 角色暂停/恢复的完整正常流程
 # 测试类型：P0 - 功能测试 / 正向测试
 # ==============================================================================
+@allure.title("case_009 角色权限正常流程测试")
+@allure.description("Minter 角色铸币、Pauser 角色暂停/恢复的完整正常流程")
+@allure.tag("ERC20", "P0", "权限", "角色")
 def test_erc20_009_role_normal_operations(token, deployer, user1, user2):
     """
     角色权限正常流程测试
@@ -641,6 +686,9 @@ def test_erc20_009_role_normal_operations(token, deployer, user1, user2):
 # 测试目标：从 Ownable 迁移到 RBAC，原权限平滑过渡
 # 测试类型：P1 - 进阶测试 / 权限测试
 # ==============================================================================
+@allure.title("case_010 权限升级机制测试")
+@allure.description("从 Ownable 迁移到 RBAC，原权限平滑过渡")
+@allure.tag("ERC20", "P1", "权限升级")
 def test_erc20_010_permission_upgrade(token, deployer, user1):
     """
     权限体系平滑升级测试
