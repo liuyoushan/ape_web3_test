@@ -23,6 +23,7 @@ except ImportError:
             return lambda f: f
     allure = dummy_allure()
 from tests.helpers.formatters import parse_ether
+from tests.helpers.logger import log
 
 
 # ================================================================================

@@ -30,6 +30,7 @@ from tests.helpers.assertions import (
 )
 from tests.helpers.formatters import format_ether
 from tests.fixtures.token_fixture import mint_token, parse_ether
+from tests.helpers.logger import log  # 企业级统一日志
 
 
 # ==============================================================================
@@ -78,10 +79,10 @@ def test_erc20_002_normal_transfer(token, deployer, user1, erc20_test_data):
     balance_user1_before = token.balanceOf(user1)
     total_supply_before = token.totalSupply()
 
-    print("[DEBUG] 转账前余额:")
-    print(f"  - deployer 余额: {format_ether(balance_deployer_before)}")
-    print(f"  - user1 余额: {format_ether(balance_user1_before)}")
-    print(f"  - totalSupply: {format_ether(total_supply_before)}")
+    log.step("case_002 阶段1：查询转账前初始余额")
+    log.debug("deployer 余额: %s", format_ether(balance_deployer_before))
+    log.debug("user1 余额: %s", format_ether(balance_user1_before))
+    log.debug("totalSupply: %s", format_ether(total_supply_before))
 
     receipt = token.transfer(
         user1,
@@ -89,10 +90,10 @@ def test_erc20_002_normal_transfer(token, deployer, user1, erc20_test_data):
         sender=deployer
     )
 
-    print(f"[DEBUG] 转账后余额:")
-    print(f"  - deployer 余额: {format_ether(token.balanceOf(deployer))}")
-    print(f"  - user1 余额: {format_ether(token.balanceOf(user1))}")
-    print(f"  - totalSupply: {format_ether(token.totalSupply())}")
+    log.step("case_002 阶段2：转账后回读验证")
+    log.debug("deployer 余额: %s", format_ether(token.balanceOf(deployer)))
+    log.debug("user1 余额: %s", format_ether(token.balanceOf(user1)))
+    log.debug("totalSupply: %s", format_ether(token.totalSupply()))
 
     assert_balance(token, deployer, balance_deployer_before - transfer_amount)
     assert_balance(token, user1, balance_user1_before + transfer_amount)

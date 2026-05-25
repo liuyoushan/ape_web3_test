@@ -24,6 +24,7 @@ except ImportError:
 
 from ape import project
 from tests.helpers.formatters import format_ether, parse_ether
+from tests.helpers.logger import log
 
 
 # ================================================================================
