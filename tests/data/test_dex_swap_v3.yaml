@@ -1,5 +1,18 @@
 # Uniswap V3 测试数据配置
 
+# case_055: 集中流动性添加测试
+case_055_concentrated_liquidity_add:
+  mint_amount: "1000"
+  add_liquidity_full_range: "100"
+  add_liquidity_narrow_range: "50"
+  fee_tier: 3000
+  tick_range_full:
+    min_tick: -887272
+    max_tick: 887272
+  tick_range_narrow:
+    min_tick: -600
+    max_tick: 600
+
 # 费率层级配置
 fee_tiers:
   tier_0_01: 100    # 0.01%

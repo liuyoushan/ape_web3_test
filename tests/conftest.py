@@ -37,6 +37,14 @@ from tests.fixtures.liquidation_fixture import (
     liquidation_constants
 )
 
+# Swap V3 测试 fixtures
+from tests.fixtures.swap_v3_fixture import (
+    swap_v3_test_data,
+    v3_tokens,
+    v3_factory_and_router,
+    v3_liquidity_environment
+)
+
 
 @pytest.fixture(scope="session")
 def deployer(accounts):
