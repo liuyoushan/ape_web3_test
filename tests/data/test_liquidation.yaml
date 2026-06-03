@@ -1,8 +1,3 @@
-"""
-==============================================================================
-清算业务测试数据配置
-==============================================================================
-"""
 case_048_liquidation_trigger:
   health_factor_warning: 1.2
   health_factor_liquidation: 1.0
@@ -15,11 +10,13 @@ case_049_normal_liquidation:
   platform_fee_pct: 0.02
   debt_amount: 1000
   expected_liquidator_reward: 100
+  collateral_amount: 1100
+  adjusted_debt: 1000
 
 case_052_liquidation_reward:
   bonus_pct: 0.1
   platform_tax_pct: 0.02
-  platform_address: "0x1111111111111111111111111111111111111111
+  platform_address: "0x1111111111111111111111111111111111111111"
 
 case_053_batch_liquidation:
   user_count: 3
@@ -28,3 +25,19 @@ case_053_batch_liquidation:
 case_054_price_oracle_manipulation:
   oracle_fake_price_high: 2.0
   oracle_fake_price_low: 0.5
+
+case_055_reentrancy_attack:
+  debt_amount: 1000
+  collateral_amount: 1500
+  reentrancy_attempts: 3
+
+# case_056 闪电贷价格操纵
+case_056_flash_loan_attack:
+  loan_amount: 100000
+  target_collateral: 2000
+  target_debt: 1000
+  expected_protection: true
+
+case_057_duplicate_liquidation:
+  debt_amount: 1000
+  collateral_amount: 1500

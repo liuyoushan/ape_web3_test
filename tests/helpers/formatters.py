@@ -46,10 +46,10 @@ def format_token_amount(amount_wei, symbol="Token", decimals=4):
 
 def parse_ether(amount_ether):
     """
-    解析 ether 字符串为 wei 整数
+    解析 ether 字符串或数字为 wei 整数
 
     Args:
-        amount_ether: 金额（字符串，如 "1000 ether"）
+        amount_ether: 金额（字符串，如 "1000 ether" 或数字）
 
     Returns:
         int: wei 整数
@@ -57,5 +57,10 @@ def parse_ether(amount_ether):
     Example:
         >>> parse_ether("1000 ether")
         1000000000000000000000
+        >>> parse_ether(1000)
+        1000000000000000000000
     """
-    return int(float(amount_ether.replace(" ether", "")) * 10**18)
+    if isinstance(amount_ether, str):
+        return int(float(amount_ether.replace(" ether", "")) * 10**18)
+    else:
+        return int(float(amount_ether) * 10**18)

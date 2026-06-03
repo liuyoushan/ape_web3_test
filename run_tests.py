@@ -233,7 +233,7 @@ def generate_allure_report(show_serve_hint: bool = False, port: int = 8080):
         
         # 创建最新报告的软链接
         latest_link = ALLURE_REPORT_DIR / "latest"
-        if latest_link.exists():
+        if latest_link.is_symlink() or latest_link.exists():
             latest_link.unlink()
         latest_link.symlink_to(timestamp)
         
@@ -261,7 +261,8 @@ def run_tests(
     marker: str = None,
     xfail: bool = False,
     serve_report: bool = False,
-    report_port: int = 8080
+    report_port: int = 8080,
+    capture: bool = False
 ):
     """
     运行 pytest 测试
@@ -315,6 +316,10 @@ def run_tests(
     
     # 添加颜色输出
     cmd.append("--color=yes")
+    
+    # 显示 print 输出（禁用 stdout 捕获）
+    if capture:
+        cmd.append("-s")
     
     # 显示命令
     log_section("测试配置")
@@ -437,6 +442,13 @@ def main():
         help="服务端口 (默认: 34567)"
     )
     
+    parser.add_argument(
+        "-s", "--capture",
+        action="store_true",
+        default=False,
+        help="显示测试中的 print 输出（禁用 stdout 捕获）"
+    )
+    
     args = parser.parse_args()
     
     # 运行测试
@@ -449,7 +461,8 @@ def main():
         marker=args.marker,
         xfail=args.runxfail,
         serve_report=args.serve,
-        report_port=args.port
+        report_port=args.port,
+        capture=args.capture
     )
     
     sys.exit(exit_code)

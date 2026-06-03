@@ -35,7 +35,12 @@ from tests.fixtures.contract_custom_fixture import (
 # 清算业务测试 fixtures
 from tests.fixtures.liquidation_fixture import (
     liquidation_test_data,
-    liquidation_constants
+    liquidation_constants,
+    collateral_token,
+    debt_token,
+    liquidation_contract,
+    malicious_attacker,
+    liquidation_environment
 )
 
 # Swap V3 测试 fixtures
@@ -44,6 +49,12 @@ from tests.fixtures.swap_v3_fixture import (
     v3_tokens,
     v3_factory_and_router,
     v3_liquidity_environment
+)
+
+# 安全高级测试 fixtures
+from tests.fixtures.security_fixture import (
+    security_test_data,
+    erc20_token
 )
 
 

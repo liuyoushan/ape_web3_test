@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.35;
 
 contract MyERC20 {
     string public name;
@@ -98,7 +98,7 @@ contract MyERC20 {
         emit Transfer(from, address(0), amount);
     }
 
-    function transfer(address to, uint256 amount) external whenNotPaused returns (bool) {
+    function transfer(address to, uint256 amount) external virtual whenNotPaused returns (bool) {
         balanceOf[msg.sender] -= amount;
         balanceOf[to] += amount;
         emit Transfer(msg.sender, to, amount);
@@ -115,7 +115,7 @@ contract MyERC20 {
         address from,
         address to,
         uint256 amount
-    ) external returns (bool) {
+    ) external virtual returns (bool) {
         allowance[from][msg.sender] -= amount;
         balanceOf[from] -= amount;
         balanceOf[to] += amount;

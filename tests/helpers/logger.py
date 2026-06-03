@@ -23,6 +23,8 @@
 
     # 持久化到文件（同时保留 stdout）
     export WEB3_TEST_LOG_FILE=./run.log
+
+    # 默认日志目录：项目根目录/logs/
 """
 
 import logging
@@ -104,7 +106,20 @@ def get_logger(name='chain_game_fi_logger'):
     logger.propagate = False
 
     level_str = os.environ.get('WEB3_TEST_LOG_LEVEL', 'DEBUG').upper()
+
+    # 默认日志文件路径：项目根目录/logs/ 目录下，按日期命名
+    # 从 tests/helpers/logger.py 获取项目根目录
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    default_log_dir = os.path.join(project_root, 'logs')
     log_file = os.environ.get('WEB3_TEST_LOG_FILE')
+
+    # 如果没有指定日志文件，使用默认路径
+    if not log_file:
+        # 确保日志目录存在
+        os.makedirs(default_log_dir, exist_ok=True)
+        # 生成带时间戳的日志文件名
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        log_file = os.path.join(default_log_dir, f'test_run_{timestamp}.log')
 
     effective_level = LOG_LEVELS.get(level_str, logging.DEBUG)
     logger.setLevel(effective_level)
@@ -128,21 +143,20 @@ def get_logger(name='chain_game_fi_logger'):
     logger.addHandler(console_h)
 
     # ======================================
-    # Handler 2: 文件持久化（环境变量启用时）
+    # Handler 2: 文件持久化（默认启用）
     # ======================================
-    if log_file:
-        try:
-            parent = os.path.dirname(log_file)
-            if parent and not os.path.isdir(parent):
-                os.makedirs(parent, exist_ok=True)
+    try:
+        parent = os.path.dirname(log_file)
+        if parent and not os.path.isdir(parent):
+            os.makedirs(parent, exist_ok=True)
 
-            file_h = logging.FileHandler(log_file, mode='a', encoding='utf-8')
-            file_h.setLevel(effective_level)
-            file_h.setFormatter(_PlainFileFormatter())
-            logger.addHandler(file_h)
-        except Exception:
-            # 持久化失败也不影响主流程
-            pass
+        file_h = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+        file_h.setLevel(effective_level)
+        file_h.setFormatter(_PlainFileFormatter())
+        logger.addHandler(file_h)
+    except Exception as e:
+        # 持久化失败也不影响主流程
+        print(f"Warning: Failed to create log file at {log_file}: {e}")
 
     _LOGGER = logger
     return logger
