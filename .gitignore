@@ -12,3 +12,5 @@ __pycache__
 # Allure 报告数据
 allure-results/
 allure-report/
+
+logs/
