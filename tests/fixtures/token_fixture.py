@@ -7,6 +7,7 @@ import yaml
 from pathlib import Path
 from ape import project
 import pytest
+from tests.helpers.formatters import parse_ether
 
 
 # ==============================================================================
@@ -22,19 +23,9 @@ def mint_token(token, sender, recipient, amount_ether):
     :param amount_ether: 金额（字符串，如 "1000 ether"）
     :return: Token 合约实例（方便链式调用）
     """
-    amount = int(float(amount_ether.replace(" ether", "")) * 10**18)
+    amount = parse_ether(amount_ether)
     token.mint(recipient, amount, sender=sender)
     return token
-
-
-def parse_ether(amount_ether):
-    """
-    解析 ether 字符串为 wei 整数
-
-    :param amount_ether: 金额（字符串，如 "1000 ether"）
-    :return: wei 整数
-    """
-    return int(float(amount_ether.replace(" ether", "")) * 10**18)
 
 
 # ==============================================================================
