@@ -99,6 +99,9 @@ contract MyERC20 {
     }
 
     function transfer(address to, uint256 amount) external virtual whenNotPaused returns (bool) {
+        require(to != address(0), "MyERC20: Transfer to zero address");
+        require(to != 0x000000000000000000000000000000000000dEaD, "MyERC20: Transfer to blackhole address");
+        
         balanceOf[msg.sender] -= amount;
         balanceOf[to] += amount;
         emit Transfer(msg.sender, to, amount);
@@ -106,6 +109,7 @@ contract MyERC20 {
     }
 
     function approve(address spender, uint256 amount) external returns (bool) {
+        require(amount != type(uint256).max, "MyERC20: Infinite approval not allowed");
         allowance[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
@@ -116,10 +120,53 @@ contract MyERC20 {
         address to,
         uint256 amount
     ) external virtual returns (bool) {
+        require(to != address(0), "MyERC20: Transfer to zero address");
+        require(to != 0x000000000000000000000000000000000000dEaD, "MyERC20: Transfer to blackhole address");
+        
         allowance[from][msg.sender] -= amount;
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
         emit Transfer(from, to, amount);
+        return true;
+    }
+
+    // ==================== 批量操作接口 ====================
+    
+    function batchTransfer(address[] calldata recipients, uint256[] calldata amounts) external whenNotPaused returns (bool) {
+        require(recipients.length == amounts.length, "MyERC20: Array length mismatch");
+        
+        for (uint256 i = 0; i < recipients.length; i++) {
+            balanceOf[msg.sender] -= amounts[i];
+            balanceOf[recipients[i]] += amounts[i];
+            emit Transfer(msg.sender, recipients[i], amounts[i]);
+        }
+        return true;
+    }
+
+    function batchApprove(address[] calldata spenders, uint256[] calldata amounts) external returns (bool) {
+        require(spenders.length == amounts.length, "MyERC20: Array length mismatch");
+        
+        for (uint256 i = 0; i < spenders.length; i++) {
+            require(amounts[i] != type(uint256).max, "MyERC20: Infinite approval not allowed");
+            allowance[msg.sender][spenders[i]] = amounts[i];
+            emit Approval(msg.sender, spenders[i], amounts[i]);
+        }
+        return true;
+    }
+
+    function batchTransferFrom(
+        address[] calldata froms,
+        address[] calldata tos,
+        uint256[] calldata amounts
+    ) external virtual returns (bool) {
+        require(froms.length == tos.length && tos.length == amounts.length, "MyERC20: Array length mismatch");
+        
+        for (uint256 i = 0; i < froms.length; i++) {
+            allowance[froms[i]][msg.sender] -= amounts[i];
+            balanceOf[froms[i]] -= amounts[i];
+            balanceOf[tos[i]] += amounts[i];
+            emit Transfer(froms[i], tos[i], amounts[i]);
+        }
         return true;
     }
 }

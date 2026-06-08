@@ -54,7 +54,11 @@ from tests.fixtures.swap_v3_fixture import (
 # 安全高级测试 fixtures
 from tests.fixtures.security_fixture import (
     security_test_data,
-    erc20_token
+    erc20_token,
+    staking_contract,
+    timelock_contract,
+    reentrancy_vault,
+    vulnerable_vault
 )
 
 
