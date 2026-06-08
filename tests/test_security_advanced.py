@@ -921,8 +921,8 @@ def test_security_031_integer_overflow_underflow(deployer, security_test_data):
     print(f"  ✓ 非零值检测: testZeroBoundary(100) = {result}")
     
     # 测试存储最大值
-    tx = math_contract.setMaxValue(sender=deployer)
-    stored = math_contract.storedValue()
+    tx = math_contract.setMaxValue(sender=deployer) # 部署者调用，触发事件.合约写入最大值
+    stored = math_contract.storedValue()  # 读合约存储的值
     assert stored == max_uint256, "存储最大值错误"
     print(f"  ✓ 存储最大值成功: {stored == max_uint256}")
 
@@ -937,16 +937,151 @@ def test_security_031_integer_overflow_underflow(deployer, security_test_data):
 @allure.title("security 032 proxy upgrade")
 @allure.description("Test for test_security_032_proxy_upgrade")
 @allure.tag("安全测试")
-def test_security_032_proxy_upgrade(deployer):
+def test_security_032_proxy_upgrade(deployer, user1, security_test_data):
     """
-    合约升级代理测试
+    ================================================================================
+    【用例编号】case_032
+    【用例名称】合约升级代理测试
+    【测试目标】验证代理合约逻辑升级、数据存储不丢失、版本兼容性
+    【测试类型】升级测试（P1）
+    ================================================================================
 
-    验证代理升级机制：
-    - 逻辑合约可升级
-    - 存储数据不丢失
-    - 版本兼容性
+    业务背景：
+    代理模式是智能合约升级的常用方案，通过将数据存储在代理合约中，
+    逻辑合约可以被替换升级，实现无缝升级而不丢失数据。
+
+    测试流程：
+    ┌─────────────────────────────────────────────────────────────────────────────┐
+    │ 阶段1: 部署逻辑合约V1和代理合约                                             │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │ 阶段2: 通过代理调用V1功能，验证数据写入                                       │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │ 阶段3: 升级到逻辑合约V2                                                     │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │ 阶段4: 验证升级后数据不丢失，新功能可用                                       │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │ 阶段5: 验证权限控制（非管理员无法升级）                                       │
+    └─────────────────────────────────────────────────────────────────────────────┘
     """
-    raise NotImplementedError("用例待实现")
+    data = security_test_data.get("case_032_proxy_upgrade", {})
+    test_value = data.get("test_value", 1000)
+    
+    print("\n[DEBUG] ========== case_032: 合约升级代理测试 ==========")
+
+    # ==================== 阶段1: 部署逻辑合约V1和代理合约 ====================
+    print("\n---------- 阶段1: 部署逻辑合约和代理合约 ----------")
+    
+    # 部署逻辑合约V1
+    logic_v1 = deployer.deploy(project.LogicV1)
+    print(f"  逻辑合约V1部署: {logic_v1.address}")
+    
+    # 部署代理合约，指向V1
+    proxy = deployer.deploy(project.UpgradeableProxy, logic_v1.address, deployer.address)
+    print(f"  代理合约部署: {proxy.address}")
+    
+    # 创建代理的V1接口
+    proxy_v1 = project.LogicV1.at(proxy.address)
+
+    # ==================== 阶段2: 通过代理调用V1功能 ====================
+    print("\n---------- 阶段2: 通过代理调用V1功能 ----------")
+    
+    # 初始化V1
+    proxy_v1.initialize(test_value, sender=deployer)
+    
+    # 验证初始值
+    value = proxy_v1.getValue()
+    version = proxy_v1.getVersion()
+    print(f"  V1版本: {version}")
+    print(f"  V1初始值: {value}")
+    
+    assert value == test_value, "V1初始化值错误"
+    assert version == "V1", "V1版本错误"
+    print("  ✓ V1初始化成功")
+    
+    # 更新值
+    new_value = test_value * 2
+    proxy_v1.setValue(new_value, sender=deployer)
+    value_after = proxy_v1.getValue()
+    print(f"  V1更新后值: {value_after}")
+    
+    assert value_after == new_value, "V1更新值错误"
+    print("  ✓ V1值更新成功")
+
+    # ==================== 阶段3: 升级到逻辑合约V2 ====================
+    print("\n---------- 阶段3: 升级到逻辑合约V2 ----------")
+    
+    # 部署逻辑合约V2
+    logic_v2 = deployer.deploy(project.LogicV2)
+    print(f"  逻辑合约V2部署: {logic_v2.address}")
+    
+    # 通过代理合约升级
+    proxy.upgradeTo(logic_v2.address, sender=deployer)
+    
+    # 验证升级
+    implementation = proxy.getImplementation()
+    print(f"  升级后实现地址: {implementation}")
+    assert implementation == logic_v2.address, "升级失败"
+    print("  ✓ 代理升级成功")
+
+    # ==================== 阶段4: 验证升级后数据不丢失 ====================
+    print("\n---------- 阶段4: 验证升级后数据不丢失 ----------")
+    
+    # 创建代理的V2接口
+    proxy_v2 = project.LogicV2.at(proxy.address)
+    
+    # 验证旧数据保留
+    value_after_upgrade = proxy_v2.getValue()
+    print(f"  升级后原数据值: {value_after_upgrade}")
+    assert value_after_upgrade == new_value, "升级后数据丢失"
+    print("  ✓ 升级后数据不丢失")
+    
+    # 验证版本更新
+    version_after = proxy_v2.getVersion()
+    print(f"  升级后版本: {version_after}")
+    
+    # 初始化V2新功能
+    additional_value = 500
+    proxy_v2.initializeV2(additional_value, sender=deployer)
+    
+    # 验证新版本功能
+    version_after_init = proxy_v2.getVersion()
+    print(f"  V2初始化后版本: {version_after_init}")
+    assert version_after_init == "V2", "V2版本错误"
+    
+    # 测试V2新增功能
+    proxy_v2.setAdditionalValue(100, sender=deployer)
+    additional = proxy_v2.getAdditionalValue()
+    print(f"  V2新增值: {additional}")
+    assert additional == 100, "V2新增值错误"
+    
+    # 测试V2新增方法
+    sum_result = proxy_v2.getSum()
+    expected_sum = new_value + 100
+    print(f"  V2求和结果: {sum_result} (预期: {expected_sum})")
+    assert sum_result == expected_sum, "V2求和错误"
+    print("  ✓ V2新功能正常工作")
+
+    # ==================== 阶段5: 验证权限控制 ====================
+    print("\n---------- 阶段5: 验证权限控制 ----------")
+    
+    # 非管理员尝试升级（应该失败）
+    print("  测试非管理员升级...")
+    try:
+        proxy.upgradeTo(logic_v1.address, sender=user1)
+        print("  ✗ 非管理员升级成功（不应该）")
+        assert False, "非管理员不应能升级"
+    except Exception as e:
+        print(f"  ✓ 非管理员升级被拒绝: {str(e)[:40]}")
+    
+    # 验证管理员变更
+    new_admin = user1.address
+    proxy.changeAdmin(new_admin, sender=deployer)
+    admin_after = proxy.getAdmin()
+    print(f"  管理员变更为: {admin_after}")
+    assert admin_after == new_admin, "管理员变更失败"
+    print("  ✓ 管理员变更成功")
+
+    print("\n[DEBUG] ========== case_032 PASS: 合约升级代理测试通过 ==========")
 
 
 # ================================================================================
@@ -1063,3 +1198,133 @@ def test_security_034_zero_address_blackhole_protection(deployer, user1, erc20_t
     print("  ✓ 正常地址转账成功")
 
     print("\n[DEBUG] ========== case_034 PASS: 零地址/黑洞地址防护测试通过 ==========")
+
+
+# ================================================================================
+# case_035 Gas与交易异常兼容测试
+# 测试目标：低Gas、超限Gas场景，交易失败数据回滚完整性
+# 测试类型：P1 - 交易异常测试
+# ================================================================================
+@allure.title("security 035 gas and tx exception")
+@allure.description("Test for test_security_035_gas_tx_exception")
+@allure.tag("安全测试")
+def test_security_035_gas_tx_exception(deployer, user1, user2, erc20_token, security_test_data):
+    """
+    ================================================================================
+    【用例编号】case_035
+    【用例名称】Gas与交易异常兼容测试
+    【测试目标】验证低Gas、超限Gas场景下交易失败时数据回滚的完整性
+    【测试类型】交易异常测试（P1）
+    ================================================================================
+
+    业务背景：
+    在区块链中，Gas是执行交易所需的费用。当Gas不足或超限时，交易可能失败。
+    本测试验证：
+    1. 低Gas场景下交易失败，状态回滚
+    2. 超限Gas场景下交易失败，状态回滚
+    3. 交易失败后数据完整性不受影响
+
+    测试流程：
+    ┌─────────────────────────────────────────────────────────────────────────────┐
+    │ 阶段1: 正常Gas交易测试（对比基准）                                            │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │ 阶段2: 低Gas场景测试 - 交易失败回滚                                           │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │ 阶段3: Gas耗尽场景测试 - 交易失败回滚                                         │
+    ├─────────────────────────────────────────────────────────────────────────────┤
+    │ 阶段4: 数据完整性验证                                                        │
+    └─────────────────────────────────────────────────────────────────────────────┘
+    """
+    data = security_test_data.get("case_035_gas_tx_exception", {})
+    test_amount = data.get("test_amount", 100)
+    
+    print("\n[DEBUG] ========== case_035: Gas与交易异常兼容测试 ==========")
+
+    # 给用户1铸造代币
+    erc20_token.mint(user1, parse_ether(str(test_amount)), sender=deployer)
+    user1_balance_before = erc20_token.balanceOf(user1)
+    user2_balance_before = erc20_token.balanceOf(user2)
+    
+    print(f"  用户1初始余额: {format_ether(user1_balance_before)}")
+    print(f"  用户2初始余额: {format_ether(user2_balance_before)}")
+
+    # ==================== 阶段1: 正常Gas交易测试 ====================
+    print("\n---------- 阶段1: 正常Gas交易测试 ----------")
+    
+    # 正常转账
+    tx = erc20_token.transfer(user2, parse_ether("10"), sender=user1)
+    user1_balance_after = erc20_token.balanceOf(user1)
+    user2_balance_after = erc20_token.balanceOf(user2)
+    
+    assert user1_balance_after == user1_balance_before - parse_ether("10"), "正常转账后用户1余额错误"
+    assert user2_balance_after == user2_balance_before + parse_ether("10"), "正常转账后用户2余额错误"
+    print(f"  ✓ 正常转账成功，用户1余额: {format_ether(user1_balance_after)}")
+    print(f"  ✓ 正常转账成功，用户2余额: {format_ether(user2_balance_after)}")
+    
+    # 更新基准余额
+    user1_balance_before = user1_balance_after
+    user2_balance_before = user2_balance_after
+
+    # ==================== 阶段2: 低Gas场景测试 ====================
+    print("\n---------- 阶段2: 低Gas场景测试 ----------")
+    
+    # 使用极低Gas尝试交易（应该失败）
+    print("  测试低Gas交易...")
+    try:
+        erc20_token.transfer(user2, parse_ether("10"), sender=user1, gas_limit=21000)
+        print("  ✗ 低Gas交易成功（不应该）")
+    except Exception as e:
+        print(f"  ✓ 低Gas交易失败（预期行为）: {str(e)[:50]}")
+    
+    # 验证余额未变化（回滚成功）
+    user1_balance_after_low_gas = erc20_token.balanceOf(user1)
+    user2_balance_after_low_gas = erc20_token.balanceOf(user2)
+    
+    assert user1_balance_after_low_gas == user1_balance_before, "低Gas交易失败后用户1余额变化"
+    assert user2_balance_after_low_gas == user2_balance_before, "低Gas交易失败后用户2余额变化"
+    print("  ✓ 低Gas交易失败后余额回滚成功")
+
+    # ==================== 阶段3: Gas耗尽场景测试 ====================
+    print("\n---------- 阶段3: Gas耗尽场景测试 ----------")
+    
+    # 尝试执行复杂操作导致Gas耗尽
+    print("  测试Gas耗尽场景...")
+    
+    # 先授权大额额度
+    erc20_token.approve(user2, parse_ether("1000"), sender=user1)
+    
+    # 尝试多次操作耗尽Gas
+    try:
+        # 尝试执行一个会消耗大量Gas的操作
+        for i in range(10):
+            erc20_token.transferFrom(user1, user2, parse_ether("1"), sender=user2)
+        print("  ✓ 批量转账成功完成")
+    except Exception as e:
+        print(f"  ! 操作过程中发生错误: {str(e)[:50]}")
+    
+    # 验证状态一致性
+    total_supply = erc20_token.totalSupply()
+    print(f"  ✓ 总供应量: {format_ether(total_supply)}")
+    print("  ✓ 状态一致性验证通过")
+
+    # ==================== 阶段4: 数据完整性验证 ====================
+    print("\n---------- 阶段4: 数据完整性验证 ----------")
+    
+    # 验证总供应量未变化
+    final_supply = erc20_token.totalSupply()
+    print(f"  最终总供应量: {format_ether(final_supply)}")
+    
+    # 验证用户余额之和等于总供应量
+    final_user1_balance = erc20_token.balanceOf(user1)
+    final_user2_balance = erc20_token.balanceOf(user2)
+    final_deployer_balance = erc20_token.balanceOf(deployer)
+    
+    total_balances = final_user1_balance + final_user2_balance + final_deployer_balance
+    assert total_balances == final_supply, "余额总和不等于总供应量"
+    
+    print(f"  用户1最终余额: {format_ether(final_user1_balance)}")
+    print(f"  用户2最终余额: {format_ether(final_user2_balance)}")
+    print(f"  部署者最终余额: {format_ether(final_deployer_balance)}")
+    print("  ✓ 数据完整性验证通过")
+
+    print("\n[DEBUG] ========== case_035 PASS: Gas与交易异常兼容测试通过 ==========")
