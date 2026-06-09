@@ -1,0 +1,11 @@
+[profile.default]
+src = "../contracts"      # 指向根目录可信任合约源，避免重复拷贝
+test = "test"
+out = "out"
+cache_path = "cache"
+optimizer = true
+optimizer_runs = 1000000
+via_ir = true
+
+[rpc_endpoints]
+local = "http://127.0.0.1:8545"

@@ -1240,13 +1240,19 @@ def test_security_035_gas_tx_exception(deployer, user1, user2, erc20_token, secu
     
     print("\n[DEBUG] ========== case_035: Gas与交易异常兼容测试 ==========")
 
+    # 记录初始ETH余额（用于查看Gas消耗）
+    user1_eth_before = user1.balance
+    user2_eth_before = user2.balance
+    
     # 给用户1铸造代币
     erc20_token.mint(user1, parse_ether(str(test_amount)), sender=deployer)
     user1_balance_before = erc20_token.balanceOf(user1)
     user2_balance_before = erc20_token.balanceOf(user2)
     
-    print(f"  用户1初始余额: {format_ether(user1_balance_before)}")
-    print(f"  用户2初始余额: {format_ether(user2_balance_before)}")
+    print(f"  用户1初始ERC20余额: {format_ether(user1_balance_before)}")
+    print(f"  用户2初始ERC20余额: {format_ether(user2_balance_before)}")
+    print(f"  用户1初始ETH余额: {format_ether(user1_eth_before)}")
+    print(f"  用户2初始ETH余额: {format_ether(user2_eth_before)}")
 
     # ==================== 阶段1: 正常Gas交易测试 ====================
     print("\n---------- 阶段1: 正常Gas交易测试 ----------")
@@ -1322,9 +1328,23 @@ def test_security_035_gas_tx_exception(deployer, user1, user2, erc20_token, secu
     total_balances = final_user1_balance + final_user2_balance + final_deployer_balance
     assert total_balances == final_supply, "余额总和不等于总供应量"
     
-    print(f"  用户1最终余额: {format_ether(final_user1_balance)}")
-    print(f"  用户2最终余额: {format_ether(final_user2_balance)}")
-    print(f"  部署者最终余额: {format_ether(final_deployer_balance)}")
-    print("  ✓ 数据完整性验证通过")
+    print(f"  用户1最终ERC20余额: {format_ether(final_user1_balance)}")
+    print(f"  用户2最终ERC20余额: {format_ether(final_user2_balance)}")
+    print(f"  部署者最终ERC20余额: {format_ether(final_deployer_balance)}")
+    print("  ✓ ERC20数据完整性验证通过")
+    
+    # 显示ETH余额变化（Gas消耗）
+    user1_eth_after = user1.balance
+    user2_eth_after = user2.balance
+    
+    user1_gas_spent = user1_eth_before - user1_eth_after
+    user2_gas_spent = user2_eth_before - user2_eth_after
+    
+    print(f"\n  === Gas费用消耗 ===")
+    print(f"  用户1ETH余额变化: {format_ether(user1_eth_before)} → {format_ether(user1_eth_after)}")
+    print(f"  用户1Gas费用支出: {format_ether(user1_gas_spent)} ETH")
+    print(f"  用户2ETH余额变化: {format_ether(user2_eth_before)} → {format_ether(user2_eth_after)}")
+    print(f"  用户2Gas费用支出: {format_ether(user2_gas_spent)} ETH")
+    print("  ✓ Gas费用记录完成")
 
     print("\n[DEBUG] ========== case_035 PASS: Gas与交易异常兼容测试通过 ==========")
