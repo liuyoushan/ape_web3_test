@@ -7,6 +7,7 @@ DEX Swap 并发压测脚本
 import json
 import time
 import threading
+import os
 from datetime import datetime
 
 from ape import accounts, project, networks
@@ -14,11 +15,11 @@ from ape import accounts, project, networks
 # 配置参数
 CONCURRENT_USERS = 10
 SWAP_AMOUNT = 10**18
-REPORT_DIR = "../reports"
+REPORT_DIR = os.path.join(os.path.dirname(__file__), "..", "reports")
 
 def run_stress_test():
-    # 连接本地网络
-    with networks.parse_network_choice("ethereum:local:node"):
+    # 连接本地网络（使用 ethereum:local 避免加载 alchemy 插件）
+    with networks.parse_network_choice("ethereum:local"):
         # 部署合约
         deployer = accounts.test_accounts[0]
         token_a = project.MyERC20.deploy("TokenA", "TKA", sender=deployer)
@@ -29,8 +30,8 @@ def run_stress_test():
         # 铸造代币并添加流动性
         token_a.mint(deployer, 100000 * 10**18, sender=deployer)
         token_b.mint(deployer, 100000 * 10**18, sender=deployer)
-        token_a.approve(router.address, 2**256 - 1, sender=deployer)
-        token_b.approve(router.address, 2**256 - 1, sender=deployer)
+        token_a.approve(router.address, 100000 * 10**18, sender=deployer)
+        token_b.approve(router.address, 100000 * 10**18, sender=deployer)
         router.addLiquidity(
             token_a.address,
             token_b.address,
@@ -44,7 +45,7 @@ def run_stress_test():
         users = accounts.test_accounts[1:CONCURRENT_USERS + 1]
         for user in users:
             token_a.mint(user, 1000 * 10**18, sender=deployer)
-            token_a.approve(router.address, 2**256 - 1, sender=user)
+            token_a.approve(router.address, 1000 * 10**18, sender=user)
 
         # 压测执行
         results = []
@@ -111,7 +112,6 @@ def run_stress_test():
         }
 
         # 保存报告
-        import os
         os.makedirs(REPORT_DIR, exist_ok=True)
         report_filename = f"{REPORT_DIR}/stress_dex_swap_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_filename, "w") as f:

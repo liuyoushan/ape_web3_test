@@ -21,3 +21,5 @@ perf/cache/
 perf/out/
 perf/lib/
 perf/foundry.lock
+perf/reports/
+perf/chaos/reports/

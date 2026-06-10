@@ -27,11 +27,11 @@ def get_gas_used():
                     try:
                         with open(file_path, 'r') as file:
                             data = json.load(file)
-                            for tx in data.get('transactions', []):
-                                gas = tx.get('gasUsed')
+                            for receipt in data.get('receipts', []):
+                                gas = receipt.get('gasUsed')
                                 if gas:
                                     total_gas += int(gas, 16) if isinstance(gas, str) else gas
-                    except:
+                    except Exception as e:
                         pass
     return total_gas
 
@@ -56,4 +56,4 @@ eth_scrape_timestamp {}
     return metrics_text, 200, {'Content-Type': 'text/plain; version=0.0.4; charset=utf-8'}
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=9100)
+    app.run(host='0.0.0.0', port=9102)

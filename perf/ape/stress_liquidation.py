@@ -24,15 +24,15 @@ CURRENT_TPS = Gauge("perf_current_tps", "实时TPS")
 
 # 配置参数
 CONCURRENT_USERS = 10
-REPORT_DIR = "../reports"
+REPORT_DIR = os.path.join(os.path.dirname(__file__), "..", "reports")
 # 长时压测开关：True=循环持续跑（常驻进程，Grafana持续有数据）；False=只跑一轮基准
 LONG_RUN_STRESS = True
 LOOP_INTERVAL = 2  # 每轮压测间隔秒
 
 def single_round_test():
     """单轮压测逻辑，抽离出来支持循环长时跑"""
-    # 连接本地网络
-    with networks.parse_network_choice("local"):
+    # 连接本地网络（使用正确的格式 ethereum:local）
+    with networks.parse_network_choice("ethereum:local"):
         deployer = accounts.test_accounts[0]
         # TODO: 部署清算相关合约
         # liquidator = project.Liquidator.deploy(sender=deployer)
