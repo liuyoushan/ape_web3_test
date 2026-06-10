@@ -1,14 +1,16 @@
 # Prometheus + Grafana 全量监控标准操作流程 (SOP)
 
 ## 文档版本
+
 - 版本：v2.0
 - 日期：2026-06-09
 - 适用范围：ape-demo/perf Prometheus + Grafana 全量监控方案
 - 特点：企业级监控体系，完整的指标采集和可视化
 
----
+***
 
 ## 目录
+
 1. [监控架构概述](#一监控架构概述)
 2. [环境准备](#二环境准备)
 3. [启动监控服务](#三启动监控服务)
@@ -20,7 +22,7 @@
 9. [常用操作](#九常用操作)
 10. [问题排查](#十问题排查)
 
----
+***
 
 ## 一、监控架构概述
 
@@ -51,12 +53,12 @@
 
 ### 1.2 组件说明
 
-| 组件 | 端口 | 职责 |
-|------|------|------|
-| **Anvil** | 8545 | 本地测试节点，产生交易和区块数据 |
+| 组件                 | 端口   | 职责                          |
+| ------------------ | ---- | --------------------------- |
+| **Anvil**          | 8545 | 本地测试节点，产生交易和区块数据            |
 | **Chain Exporter** | 9100 | 从广播报告中提取指标，暴露 Prometheus 格式 |
-| **Prometheus** | 9090 | 指标采集、存储和查询 |
-| **Grafana** | 3000 | 可视化仪表盘和告警 |
+| **Prometheus**     | 9090 | 指标采集、存储和查询                  |
+| **Grafana**        | 3000 | 可视化仪表盘和告警                   |
 
 ### 1.3 数据流向
 
@@ -67,18 +69,18 @@
                             数据采集和展示全链路
 ```
 
----
+***
 
 ## 二、环境准备
 
 ### 2.1 前置依赖
 
-| 依赖 | 版本要求 | 安装方式 |
-|------|----------|----------|
-| Docker | >= 20.0 | `curl -fsSL https://get.docker.com \| sh` |
-| Docker Compose | >= 2.0 | `sudo apt install docker-compose` |
-| Python | >= 3.8 | 系统自带 |
-| Flask | >= 2.0 | `pip install flask` |
+| 依赖             | 版本要求    | 安装方式                                      |
+| -------------- | ------- | ----------------------------------------- |
+| Docker         | >= 20.0 | `curl -fsSL https://get.docker.com \| sh` |
+| Docker Compose | >= 2.0  | `sudo apt install docker-compose`         |
+| Python         | >= 3.8  | 系统自带                                      |
+| Flask          | >= 2.0  | `pip install flask`                       |
 
 ### 2.2 验证依赖
 
@@ -106,7 +108,7 @@ ss -tlnp | grep -E ':(3000|9090|9100|8545)'
 # 或者修改配置文件中的端口
 ```
 
----
+***
 
 ## 三、启动监控服务
 
@@ -196,7 +198,7 @@ curl http://localhost:9090/api/v1/targets
 curl http://localhost:3000/api/health
 ```
 
----
+***
 
 ## 四、配置 Prometheus
 
@@ -253,15 +255,16 @@ eth_total_gas_used
 rate(eth_transaction_count_total[5m])
 ```
 
----
+***
 
 ## 五、配置 Grafana
 
 ### 5.1 访问 Grafana
 
-浏览器打开：**http://localhost:3000**
+浏览器打开：**<http://localhost:3000>**
 
 默认登录信息：
+
 - 用户名：`admin`
 - 密码：`admin`
 
@@ -288,7 +291,7 @@ curl http://localhost:3000/api/datasources/proxy/1/api/v1/query?query=up
 # {"status":"success","data":{"resultType":"vector","result":[...]}}
 ```
 
----
+***
 
 ## 六、创建监控仪表盘
 
@@ -301,11 +304,13 @@ curl http://localhost:3000/api/datasources/proxy/1/api/v1/query?query=up
 ### 6.2 添加交易总数面板
 
 **查询配置：**
+
 ```promql
 eth_transaction_count_total
 ```
 
 **面板设置：**
+
 - **Title**: `交易总数`
 - **Visualization**: `Stat`
 - **Unit**: `none`
@@ -313,11 +318,13 @@ eth_transaction_count_total
 ### 6.3 添加 Gas 消耗面板
 
 **查询配置：**
+
 ```promql
 eth_total_gas_used
 ```
 
 **面板设置：**
+
 - **Title**: `总 Gas 消耗`
 - **Visualization**: `Stat`
 - **Unit**: `none`
@@ -325,11 +332,13 @@ eth_total_gas_used
 ### 6.4 添加 TPS 面板
 
 **查询配置：**
+
 ```promql
 rate(eth_transaction_count_total[5m])
 ```
 
 **面板设置：**
+
 - **Title**: `TPS (每秒交易数)`
 - **Visualization**: `Time series`
 - **Unit**: `ops/sec`
@@ -337,6 +346,7 @@ rate(eth_transaction_count_total[5m])
 ### 6.5 添加成功率面板
 
 **查询配置：**
+
 ```promql
 # 成功交易占比
 sum(rate(eth_transaction_count_total[5m])) 
@@ -345,10 +355,11 @@ sum(rate(eth_transaction_count_total[5m])) * 100
 ```
 
 **面板设置：**
+
 - **Title**: `交易成功率`
 - **Visualization**: `Gauge`
 - **Unit**: `percent (0-100)`
-- **Thresholds**: 
+- **Thresholds**:
   - Red: `< 80`
   - Yellow: `80-95`
   - Green: `> 95`
@@ -359,25 +370,25 @@ sum(rate(eth_transaction_count_total[5m])) * 100
 2. 输入仪表盘名称：`区块链性能监控`
 3. 点击 **Save**
 
----
+***
 
 ## 七、监控指标体系
 
 ### 7.1 核心指标
 
-| 指标名称 | 类型 | 说明 | 告警阈值 |
-|----------|------|------|----------|
-| `eth_transaction_count_total` | Gauge | 交易总数 | - |
-| `eth_total_gas_used` | Gauge | 总 Gas 消耗 | > 10M |
-| `eth_scrape_timestamp` | Gauge | 抓取时间戳 | - |
+| 指标名称                          | 类型    | 说明       | 告警阈值  |
+| ----------------------------- | ----- | -------- | ----- |
+| `eth_transaction_count_total` | Gauge | 交易总数     | -     |
+| `eth_total_gas_used`          | Gauge | 总 Gas 消耗 | > 10M |
+| `eth_scrape_timestamp`        | Gauge | 抓取时间戳    | -     |
 
 ### 7.2 计算指标
 
-| 指标名称 | PromQL 查询 | 说明 |
-|----------|-------------|------|
-| TPS | `rate(eth_transaction_count_total[5m])` | 每秒交易数 |
-| 平均 Gas | `eth_total_gas_used / eth_transaction_count_total` | 平均每笔交易 Gas |
-| Gas 消耗速率 | `rate(eth_total_gas_used[5m])` | 每秒 Gas 消耗 |
+| 指标名称     | PromQL 查询                                          | 说明         |
+| -------- | -------------------------------------------------- | ---------- |
+| TPS      | `rate(eth_transaction_count_total[5m])`            | 每秒交易数      |
+| 平均 Gas   | `eth_total_gas_used / eth_transaction_count_total` | 平均每笔交易 Gas |
+| Gas 消耗速率 | `rate(eth_total_gas_used[5m])`                     | 每秒 Gas 消耗  |
 
 ### 7.3 推荐面板布局
 
@@ -398,7 +409,7 @@ sum(rate(eth_transaction_count_total[5m])) * 100
 └─────────────────────────────────────────────────────────────┘
 ```
 
----
+***
 
 ## 八、告警配置
 
@@ -413,6 +424,7 @@ sum(rate(eth_transaction_count_total[5m])) * 100
 ### 8.2 告警规则示例
 
 **高 Gas 消耗告警：**
+
 ```yaml
 # 条件
 WHEN last() OF query(A) > 10000000
@@ -429,6 +441,7 @@ description: "总 Gas 消耗超过 10M"
 ```
 
 **低 TPS 告警：**
+
 ```yaml
 # 条件
 WHEN last() OF query(A) < 10
@@ -452,7 +465,7 @@ description: "TPS 低于 10 笔/秒"
 4. 配置通知参数
 5. 点击 **Save contact point**
 
----
+***
 
 ## 九、常用操作
 
@@ -461,7 +474,7 @@ description: "TPS 低于 10 笔/秒"
 ```bash
 # 启动所有服务
 cd /home/liuyoushan/ape-demo/perf/monitoring
-docker-compose up -d
+docker compose up -d
 
 # 停止所有服务
 docker-compose down
@@ -500,18 +513,18 @@ curl http://localhost:3000/api/dashboards/uid/<uid> -H "Authorization: Bearer <a
 curl -X POST http://localhost:3000/api/dashboards/db -H "Content-Type: application/json" -d @dashboard.json
 ```
 
----
+***
 
 ## 十、问题排查
 
 ### 10.1 常见问题
 
-| 问题 | 原因 | 解决方案 |
-|------|------|----------|
-| Prometheus 无法连接 Exporter | 网络配置错误 | 检查 targets 配置 |
-| Grafana 无法连接 Prometheus | 数据源配置错误 | 检查 URL 配置 |
-| 指标数据为空 | Exporter 未运行 | 启动 chain_exporter.py |
-| 容器启动失败 | 端口被占用 | 检查端口占用情况 |
+| 问题                       | 原因           | 解决方案                  |
+| ------------------------ | ------------ | --------------------- |
+| Prometheus 无法连接 Exporter | 网络配置错误       | 检查 targets 配置         |
+| Grafana 无法连接 Prometheus  | 数据源配置错误      | 检查 URL 配置             |
+| 指标数据为空                   | Exporter 未运行 | 启动 chain\_exporter.py |
+| 容器启动失败                   | 端口被占用        | 检查端口占用情况              |
 
 ### 10.2 调试命令
 
@@ -543,7 +556,7 @@ docker-compose down -v
 docker-compose up -d
 ```
 
----
+***
 
 ## 附录：快速启动脚本
 
@@ -568,7 +581,7 @@ sleep 2
 
 # 3. 启动 Prometheus 和 Grafana
 echo "启动 Prometheus 和 Grafana..."
-docker-compose up -d
+docker compose up -d
 
 echo ""
 echo "=== 监控服务已启动 ==="
@@ -577,10 +590,11 @@ echo "Grafana:    http://localhost:3000 (admin/admin)"
 echo "Exporter:   http://localhost:9100/metrics"
 ```
 
----
+***
 
 **文档结束**
 
----
+***
 
 > 📌 **提示**：此文档为 Prometheus + Grafana 全量监控专用教程。如需轻量级监控方案（无需 Docker），请参考 `SOP_LIGHT.md`。
+

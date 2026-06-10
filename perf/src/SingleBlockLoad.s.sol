@@ -2,9 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import "./contracts/MiniSwapRouter.sol";
-import "./contracts/MiniSwapFactory.sol";
-import "./contracts/MyERC20.sol";
+import "contracts/MiniSwapRouter.sol";
+import "contracts/MiniSwapFactory.sol";
+import "contracts/MyERC20.sol";
 
 contract SingleBlockLoad is Script {
     uint256 public constant BATCH_COUNT = 50;
@@ -12,10 +12,11 @@ contract SingleBlockLoad is Script {
     uint256 constant APPROVAL_AMOUNT = type(uint256).max - 1;
 
     function run() external {
-        uint256 deployerKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerKey = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
         address deployer = vm.addr(deployerKey);
-        vm.startBroadcast(deployerKey);
 
+        vm.startBroadcast(deployerKey);
+        
         MyERC20 tokenA = new MyERC20("TokenA", "TKA");
         MyERC20 tokenB = new MyERC20("TokenB", "TKB");
         MiniSwapFactory factory = new MiniSwapFactory();
@@ -43,7 +44,7 @@ contract SingleBlockLoad is Script {
         uint256 totalGas = gasBefore - gasleft();
         vm.stopBroadcast();
 
-        console.log("\n========== Single Block Load Report ==========");
+        console.log("========== Single Block Load Report ==========");
         console.log("Batch count       :", BATCH_COUNT);
         console.log("Success count     :", successCount);
         console.log("Total gas used    :", totalGas);

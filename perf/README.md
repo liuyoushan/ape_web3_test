@@ -47,8 +47,8 @@ anvil
 ```bash
 cd perf
 
-# 设置私钥（anvil 默认测试私钥）
-export PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+# 加载环境变量（.env 文件方式）
+source .env
 
 # Gas 基准测试
 forge script src/GasBenchmark.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
@@ -58,6 +58,12 @@ forge script src/SingleBlockLoad.s.sol --rpc-url http://127.0.0.1:8545 --broadca
 
 # 多用户并发压测
 forge script src/MultiUserConcurrent.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
+```
+
+**.env 文件示例：**
+```bash
+# .env 文件内容
+PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
 
 ### 3. Ape 压测（Python）

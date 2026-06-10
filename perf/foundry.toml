@@ -1,11 +1,19 @@
 [profile.default]
-src = "../contracts"      # 指向根目录可信任合约源，避免重复拷贝
+src = "src"
 test = "test"
 out = "out"
 cache_path = "cache"
 optimizer = true
 optimizer_runs = 1000000
 via_ir = true
+solc = "0.8.20"
+# 关键：放行上级contracts目录，解除"文件超出允许目录"拦截
+allow_paths = ["../contracts"]
+# 路径映射不变，保留你原来的配置
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+    "contracts/=../contracts/"
+]
 
 [rpc_endpoints]
 local = "http://127.0.0.1:8545"
