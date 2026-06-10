@@ -14,3 +14,10 @@ allure-results/
 allure-report/
 
 logs/
+
+# Foundry / perf
+perf/broadcast/
+perf/cache/
+perf/out/
+perf/lib/
+perf/foundry.lock
