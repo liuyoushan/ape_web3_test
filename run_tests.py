@@ -24,8 +24,8 @@ from pathlib import Path
 # ==================== 配置常量 ====================
 ROOT_DIR = Path(__file__).parent
 TEST_DIR = ROOT_DIR / "tests"
-ALLURE_RESULTS_DIR = ROOT_DIR / "allure-results"
-ALLURE_REPORT_DIR = ROOT_DIR / "allure-report"
+ALLURE_RESULTS_DIR = ROOT_DIR / "report" / "allure-results"
+ALLURE_REPORT_DIR = ROOT_DIR / "report" / "allure-report"
 PYTEST_CACHE_DIR = ROOT_DIR / ".pytest_cache"
 
 # 项目 venv 环境路径
@@ -243,7 +243,7 @@ def generate_allure_report(show_serve_hint: bool = False, port: int = 8080):
         
         # 显示手动启动服务的提示
         if show_serve_hint:
-            log_info(f"🌐 启动服务: cd /home/liuyoushan/ape-demo/allure-report && python3 -m http.server 8080")
+            log_info(f"🌐 启动服务：cd /home/liuyoushan/ape-demo/report/allure-report && python3 -m http.server 8080")
             print()
             
     except FileNotFoundError:
