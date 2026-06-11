@@ -16,6 +16,7 @@ on:
       - "contracts/**"
       - "scripts/**"
       - "tests/**"
+      - ".github/workflows/ape-ci.yml"
 
 jobs:
   ape_verify:
@@ -40,6 +41,8 @@ jobs:
           pip install eth-ape ape-solidity ape-ethereum web3
           # 测试/格式化/日志依赖
           pip install pytest pyyaml flake8
+          # Allure 报告依赖
+          pip install allure-pytest
 
       # 4. Solidity合约编译校验（Ape内置编译）
       - name: Compile all contracts
@@ -53,10 +56,9 @@ jobs:
       - name: Start Anvil local node
         run: |
           curl -L https://foundry.paradigm.xyz/install.sh | bash
-          source ~/.bashrc
-          foundryup
-          anvil --chain-id 31337 --port 8545 &
-          sleep 3
+          ~/.foundry/bin/foundryup
+          ~/.foundry/bin/anvil --chain-id 31337 --port 8545 &
+          sleep 5
         env:
           RPC_URL: http://127.0.0.1:8545
 
@@ -70,7 +72,16 @@ jobs:
         env:
           RPC_URL: http://127.0.0.1:8545
 
-      # 9. 兜底清理后台Anvil进程，避免CI资源残留
-      if: always()
-        name: Clean up Anvil process
+      # 9. 上传 Allure 测试报告
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: report/allure-report/
+          retention-days: 30
+
+      # 10. 兜底清理后台Anvil进程，避免CI资源残留
+      - name: Clean up Anvil process
+        if: always()
         run: pkill -f anvil || true
