@@ -17,7 +17,8 @@ on:
       - "scripts/**"
       - "tests/**"
       - ".github/workflows/ape-ci.yml"
-
+  # 新增：页面手动一键触发开关，无任何提交也能跑最新代码
+  workflow_dispatch:
 jobs:
   ape_verify:
     runs-on: ubuntu-latest
