@@ -26,12 +26,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 配置Python3.11，缓存依赖加速
+      # 2. 配置Python3.11
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
       # 3. 安装Ape核心依赖 + 测试工具
       - name: Install Ape & Dependencies
