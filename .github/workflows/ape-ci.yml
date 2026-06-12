@@ -68,7 +68,8 @@ jobs:
       # 8. 完整pytest单元测试（加载tests下全部用例、fixture、yaml测试数据）
       - name: Execute all pytest test cases
         run: |
-          pip install allure-commandline
+          sudo apt-get update && sudo apt-get install -y npm
+          npm install -g allure-commandline
           python run_tests.py || true
         env:
           RPC_URL: http://127.0.0.1:8545
