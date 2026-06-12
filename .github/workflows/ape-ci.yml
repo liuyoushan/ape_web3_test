@@ -26,22 +26,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. 配置Python3.11
+      # 2. 配置Python3.11，缓存依赖加速
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       # 3. 安装Ape核心依赖 + 测试工具
       - name: Install Ape & Dependencies
         run: |
           python -m pip install --upgrade pip
-          # Ape核心框架 + Solidity编译插件 + 以太坊RPC插件
-          pip install eth-ape ape-solidity ape-ethereum web3
-          # 测试/格式化/日志依赖
-          pip install pytest pyyaml flake8
-          # Allure 报告依赖
-          pip install allure-pytest
+          pip install -r requirements.txt
 
       # 4. Solidity合约编译校验（Ape内置编译）
       - name: Compile all contracts
