@@ -82,7 +82,7 @@ py-multibase==1.0.3
 py-multicodec==0.2.1
 pycryptodome==3.23.0
 pydantic==2.13.4
-pydantic-settings>=3
+pydantic-settings>=2.5
 pydantic_core==2.46.4
 Pygments==2.20.0
 pymultihash==0.8.2
