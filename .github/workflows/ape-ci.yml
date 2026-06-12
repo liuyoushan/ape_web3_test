@@ -47,15 +47,17 @@ jobs:
       - name: Lint python code
         run: flake8 scripts/ tests/ --max-line-length=120 || true
 
-      # 6. 启动轻量Anvil本地链，用于部署冒烟+单元测试
+      # 6. 安装并启动 Anvil 本地链
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      # 7. 启动轻量Anvil本地链，用于部署冒烟+单元测试
       - name: Start Anvil local node
         run: |
-          sudo apt-get update && sudo apt-get install -y curl
-          curl -sL https://foundry.paradigm.xyz/install.sh | bash -s -- -y
-          source "$HOME/.foundry/env"
-          foundryup
           anvil --chain-id 31337 --port 8545 &
-          sleep 5
+          sleep 3
         env:
           RPC_URL: http://127.0.0.1:8545
 
