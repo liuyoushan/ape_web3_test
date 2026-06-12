@@ -9,7 +9,6 @@
 # ------------------------------
 eth-ape>=0.8.50
 ape-solidity>=0.8.0
-ape-ethereum>=0.8.0
 ape-alchemy>=0.8.0
 ape-polygon>=0.8.0
 
