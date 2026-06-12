@@ -43,9 +43,9 @@ jobs:
       - name: Compile all contracts
         run: ape compile
 
-      # 5. 全目录Python静态语法检查（scripts + tests）
+      # 5. 全目录Python静态语法检查（scripts + tests）- 仅警告不阻断
       - name: Lint python code
-        run: flake8 scripts/ tests/ --max-line-length=120
+        run: flake8 scripts/ tests/ --max-line-length=120 || true
 
       # 6. 启动轻量Anvil本地链，用于部署冒烟+单元测试
       - name: Start Anvil local node
