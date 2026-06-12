@@ -1,0 +1,34 @@
+# ==============================================================================
+# ERC20 测试数据
+# ==============================================================================
+common:
+  token_name: "MyToken"
+  token_symbol: "MTK"
+  expected_decimals: 18
+  expected_initial_supply: 0
+
+case_002_transfer:
+  mint_amount: "1000 ether"
+  transfer_amount: "200 ether"
+
+case_003_insufficient_transfer:
+  balance: "100 ether"
+  transfer_amount: "200 ether"
+
+case_004_approve:
+  approve_amount: "500 ether"
+
+case_005_transfer_from:
+  mint_amount: "1000 ether"
+  approve_amount: "300 ether"
+  transfer_amount: "200 ether"
+
+case_006_mint:
+  mint_amount: "500 ether"
+
+case_007_burn:
+  mint_amount: "1000 ether"
+  burn_amount: "200 ether"
+  approve_amount: "300 ether"
+  burn_from_amount: "100 ether"
+  excess_burn_amount: "1000 ether"

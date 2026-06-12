@@ -1,0 +1,25 @@
+# Ape stuff
+.build/
+.cache/
+
+# Python
+.env
+.venv
+.pytest_cache
+.python-version
+__pycache__
+
+# Allure 报告数据
+report/allure-results/
+report/allure-report/
+
+logs/
+
+# Foundry / perf
+perf/broadcast/
+perf/cache/
+perf/out/
+perf/lib/
+perf/foundry.lock
+perf/reports/
+perf/chaos/reports/
