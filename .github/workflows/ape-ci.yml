@@ -19,6 +19,9 @@ on:
       - ".github/workflows/ape-ci.yml"
   # 新增：页面手动一键触发开关，无任何提交也能跑最新代码
   workflow_dispatch:
+  # 新增：每天北京时间8点自动运行（UTC时间0点）
+  schedule:
+    - cron: "0 0 * * *"
 jobs:
   ape_verify:
     runs-on: ubuntu-latest
@@ -47,8 +50,24 @@ jobs:
       - name: Lint python code
         run: flake8 scripts/ tests/ --max-line-length=120 || true
 
-      # 6. 安装并启动 Anvil 本地链
-      - name: Install Foundry
+      # 6. 安装并启动 Anvil 本地链（带重试机制）
+      - name: Install Foundry (retry up to 3 times)
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+        continue-on-error: true
+
+      # 6.1 如果第一次失败，重试安装
+      - name: Retry Install Foundry if failed
+        if: failure()
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+        continue-on-error: true
+
+      # 6.2 第二次重试
+      - name: Retry Install Foundry again if still failed
+        if: failure()
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
@@ -65,7 +84,7 @@ jobs:
       - name: Run deploy script smoke test
         run: ape run deploy --network ethereum:local
 
-      # 8. 完整pytest单元测试（加载tests下全部用例、fixture、yaml测试数据）
+      # 9. 完整pytest单元测试（加载tests下全部用例、fixture、yaml测试数据）
       - name: Execute all pytest test cases
         run: |
           sudo apt-get update && sudo apt-get install -y npm
@@ -74,7 +93,7 @@ jobs:
         env:
           RPC_URL: http://127.0.0.1:8545
 
-      # 9. 上传 Allure 测试报告
+      # 10. 上传 Allure 测试报告
       - name: Upload Allure Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -83,7 +102,7 @@ jobs:
           path: report/allure-report/
           retention-days: 30
 
-      # 10. 兜底清理后台Anvil进程，避免CI资源残留
+      # 11. 兜底清理后台Anvil进程，避免CI资源残留
       - name: Clean up Anvil process
         if: always()
         run: pkill -f anvil || true
