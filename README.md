@@ -218,13 +218,22 @@ def test_erc20_003_insufficient_balance_transfer(token, deployer, user1):
 ***
 
 ## 项目业务价值
+
 本自动化框架用于DeFi合约迭代全流程回归，替代人工重复测试：
+
 1. 迭代版本回归耗时从2天缩短至20分钟，释放开发与手工测试人力；
 2. 分层用例覆盖资金、权限、重入、整数溢出高危场景，上线前拦截全部资金逻辑漏洞；
 3. CI流水线提交自动执行，阻断缺陷合入主分支，保障线上资产安全。
 
 ## 配套性能&稳定性测试仓库
-并发压测、混沌故障注入、线上全链路监控：https://github.com/liuyoushan/blockchain-perf-test
+
+并发压测、混沌故障注入、线上全链路监控：<https://github.com/liuyoushan/blockchain-perf-test>
+
+## 报告目录下起服务查git actions的报告：
+
+```
+python -m http.server 8080
+```
 
 ## 相关资源
 
