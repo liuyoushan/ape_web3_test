@@ -14,7 +14,7 @@
 | **合约覆盖** | ERC20(RBAC)、Uniswap 式 DEX(Factory/Pair/Router)、自定义业务合约 |
 | **用例设计** | 功能测试与安全测试分层设计，覆盖正向与异常场景                                |
 | **断言体系** | 链上事件校验、余额变化验证、权限边界检查、异常 revert 验证                      |
-| **架构设计** | Fixture 工厂 + YAML 数据驱动 + 断言助手，模块化解耦                    |
+| **架构设计** | 四层架构（框架层/模块层/数据层/用例层），模块化解耦                            |
 
 ***
 
@@ -35,49 +35,79 @@ ape-demo/
 │   └── HelloWorld.sol              # 示例合约
 ├── scripts/
 │   └── deploy.py                   # 合约部署脚本
-├── tests/
-│   ├── conftest.py                 # pytest 共享 Fixture 配置
-│   ├── data/                       # 测试数据（YAML 格式）
-│   │   ├── test_erc20.yaml
-│   │   ├── test_dex_swap.yaml
-│   │   ├── test_dex_swap_v3.yaml
-│   │   ├── test_liquidation.yaml
-│   │   ├── test_nft.yaml
-│   │   ├── test_security_advanced.yaml
-│   │   └── test_swap_custom_func.yaml
-│   ├── fixtures/                   # Fixture 工厂模块
-│   │   ├── token_fixture.py        # ERC20 相关 Fixture
-│   │   ├── dex_fixture.py          # DEX 相关 Fixture
-│   │   ├── liquidation_fixture.py  # 清算相关 Fixture
-│   │   ├── swap_v3_fixture.py      # Uniswap V3 相关 Fixture
-│   │   ├── security_fixture.py     # 安全测试 Fixture
-│   │   └── contract_custom_fixture.py # 自定义合约 Fixture
-│   ├── helpers/                    # 测试助手
+├── framework/                       # 框架核心层（原子能力）
+│   ├── core/                       # 核心工具
+│   │   ├── logger.py              # 企业级日志模块
+│   │   ├── formatters.py          # 格式转换工具（parse_ether 等）
 │   │   ├── assertions.py           # 可复用断言函数
-│   │   ├── formatters.py           # 格式转换工具
-│   │   └── logger.py               # 企业级日志模块
-│   ├── test_erc20.py               # ERC20 代币测试
-│   ├── test_dex_swap.py            # DEX 交易所测试
-│   ├── test_dex_swap_v3.py         # Uniswap V3 测试
-│   ├── test_liquidation.py         # 清算业务测试
-│   ├── test_nft.py                 # NFT/SFT 测试
-│   ├── test_security_advanced.py   # 安全场景测试
-│   ├── test_contract_custom.py     # 业务合约测试
-│   └── test_swap_custom_func.py    # DEX 高阶流程测试
+│   │   ├── config.py              # 配置管理
+│   │   ├── retry_helper.py        # 重试机制
+│   │   ├── polling_helper.py       # 轮询机制
+│   │   └── test_data_factory.py    # 测试数据工厂
+│   ├── api/                        # HTTP API 客户端（CEX 测试）
+│   │   └── http_client.py
+│   └── web3/                       # Web3 交互封装
+│       └── ape_client.py
+├── tests/                          # 测试用例层（四层架构）
+│   ├── conftest.py                 # pytest 全局共享 Fixture
+│   ├── erc20/                      # ERC20 模块
+│   │   ├── apis/                   # API 原子封装
+│   │   ├── fixtures/               # Fixture 环境准备
+│   │   ├── data/                   # 测试数据
+│   │   └── scenarios/              # 测试用例
+│   ├── dex_swap/                   # DEX 模块
+│   │   ├── apis/
+│   │   ├── fixtures/
+│   │   ├── data/
+│   │   └── scenarios/
+│   ├── liquidation/                # 清算模块
+│   │   ├── apis/
+│   │   ├── fixtures/
+│   │   ├── data/
+│   │   └── scenarios/
+│   ├── security/                   # 安全模块
+│   │   ├── apis/
+│   │   ├── fixtures/
+│   │   ├── data/
+│   │   └── scenarios/
+│   ├── nft/                        # NFT 模块
+│   │   ├── fixtures/
+│   │   ├── data/
+│   │   └── scenarios/
+│   ├── contract_custom/            # 自定义合约模块
+│   │   ├── apis/
+│   │   ├── fixtures/
+│   │   ├── data/
+│   │   └── scenarios/
+│   └── api/                        # CEX API 模块（预留）
+│       ├── apis/
+│       ├── fixtures/
+│       └── scenarios/
 ├── logs/                           # 运行日志目录
 ├── run_tests.py                    # 统一测试运行入口
 └── case_list                       # 完整测试用例清单
 ```
 
-### 核心模块说明
+### 四层架构说明
 
-| 模块                  | 职责                           |
-| ------------------- | ---------------------------- |
-| `tests/data/*.yaml` | 存储测试参数（金额、地址、期望结果），实现数据与代码分离 |
-| `tests/fixtures/`   | 合约部署、工具函数、共享上下文封装            |
-| `tests/helpers/`    | 可复用断言函数、格式化工具、日志模块           |
-| `tests/conftest.py` | pytest 共享入口，统一导出所有 Fixtures  |
-| `run_tests.py`      | 企业级测试运行器，支持 Allure 报告、网络配置等  |
+| 层级      | 目录                    | 职责                                            |
+| ------- | --------------------- | --------------------------------------------- |
+| **框架层** | `framework/`          | 原子能力：日志、格式化、断言、重试、轮询、配置                       |
+| **模块层** | `tests/{module}/`     | 按业务域划分：erc20、dex\_swap、liquidation、security 等 |
+| **数据层** | `{module}/data/`      | YAML 测试数据，与代码分离                               |
+| **用例层** | `{module}/scenarios/` | 具体测试用例实现                                      |
+
+### 各模块说明
+
+| 模块                 | 目录                           | 职责                        |
+| ------------------ | ---------------------------- | ------------------------- |
+| `erc20/`           | apis/fixtures/data/scenarios | ERC20 代币测试（转账、授权、铸造、RBAC） |
+| `dex_swap/`        | apis/fixtures/data/scenarios | DEX 交易所测试（Swap、流动性、手续费）   |
+| `liquidation/`     | apis/fixtures/data/scenarios | 清算业务测试（清算触发、奖励计算）         |
+| `security/`        | apis/fixtures/data/scenarios | 安全测试（重入、整数溢出、闪电贷）         |
+| `nft/`             | fixtures/data/scenarios      | NFT 测试（ERC721/ERC1155）    |
+| `contract_custom/` | apis/fixtures/data/scenarios | 自定义合约测试                   |
+| `api/`             | apis/fixtures/scenarios      | CEX API 测试（预留）            |
 
 ***
 
@@ -110,10 +140,10 @@ ape plugins install solidity anvil
 python3 run_tests.py
 
 # 运行指定测试文件
-python3 run_tests.py tests/test_erc20.py
+python3 run_tests.py tests/erc20/scenarios/
 
 # 运行特定用例
-python3 run_tests.py tests/test_erc20.py::test_erc20_001_metadata_verification
+python3 run_tests.py tests/erc20/scenarios/test_erc20_metadata.py::test_erc20_001_metadata_verification
 
 # 指定网络运行
 python3 run_tests.py --network ethereum:local
@@ -138,7 +168,7 @@ python3 run_tests.py --help
 ape test
 
 # 运行特定模块测试
-ape test tests/test_erc20.py -v
+ape test tests/erc20/scenarios/ -v
 
 # 运行特定用例
 ape test -k "test_erc20_001" -v
@@ -150,15 +180,15 @@ ape test -k "test_erc20_001" -v
 
 ### 命名规范
 
-- **测试文件**：`test_{业务域}.py`（如 `test_erc20.py`）
+- **测试文件**：`test_{业务域}_{编号}.py`（如 `test_erc20_metadata.py`）
 - **测试函数**：`test_{业务域}_{编号}_{描述}`（如 `test_erc20_001_metadata_verification`）
 
 ### 用例优先级说明
 
-| 优先级    | 标识 | 说明                |
-| ------ | -- | ----------------- |
-| **P0** | 必测 | 中级岗刚需、面试高频、核心业务流程 |
-| **P1** | 推荐 | 进阶拓展、拔高加分、安全防护场景  |
+| 优先级    | 标识 | 说明          |
+| ------ | -- | ----------- |
+| **P0** | 必测 | 核心业务流程      |
+| **P1** | 推荐 | 进阶拓展、安全防护场景 |
 
 ### 测试用例分类
 
@@ -175,7 +205,7 @@ ape test -k "test_erc20_001" -v
 ### YAML 测试数据格式
 
 ```yaml
-# tests/data/test_erc20.yaml
+# tests/erc20/data/test_erc20.yaml
 common:
   token_name: "My Advanced Token"
   token_symbol: "MAT"
@@ -190,24 +220,28 @@ case_002_transfer:
 ### 异常测试示例
 
 ```python
-def test_erc20_003_insufficient_balance_transfer(token, deployer, user1):
+def test_erc20_003_insufficient_balance_transfer(erc20_token, deployer, user1):
     """余额不足异常转账测试"""
-    token = mint_token(token, deployer, deployer, "1000 ether")
-    transfer_amount = parse_ether("2000 ether")
-    
-    balance_before = token.balanceOf(deployer)
-    
+    from framework.core.formatters import parse_ether
+
+    mint_amount = parse_ether("1000")
+    erc20_token.mint(deployer, mint_amount, sender=deployer)
+
+    transfer_amount = parse_ether("2000")
+
+    balance_before = erc20_token.balanceOf(deployer)
+
     with pytest.raises((ContractLogicError, VirtualMachineError)):
-        token.transfer(user1, transfer_amount, sender=deployer)
-    
-    assert token.balanceOf(deployer) == balance_before
+        erc20_token.transfer(user1, transfer_amount, sender=deployer)
+
+    assert erc20_token.balanceOf(deployer) == balance_before
 ```
 
 ***
 
 ## 配置说明
 
-核心配置见 [ape-config.yaml](ape-config.yaml)：
+核心配置见 `ape-config.yaml`：
 
 - `plugins`: Solidity 编译器、Anvil 节点、Etherscan 验证插件
 - `ethereum`: 多链网络配置（local/mainnet-fork/goerli/polygon）

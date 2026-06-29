@@ -1,0 +1,3 @@
+case_055_concentrated_liquidity_add:
+  add_liquidity_full_range: "1000"
+  add_liquidity_narrow_range: "500"

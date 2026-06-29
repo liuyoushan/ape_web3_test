@@ -2,64 +2,15 @@
 ==============================================================================
 共享 Fixture 配置
 ==============================================================================
+
+注意：各模块的 fixtures 已迁移到对应模块的 fixtures 目录中，
+通过各模块的 conftest.py 自动加载。
+
+本文件仅保留全局共享的基础 fixtures（如账户）。
+==============================================================================
 """
 import pytest
 from ape import project
-
-# 直接导入 fixtures
-from tests.fixtures.token_fixture import (
-    erc20_test_data,
-    token,
-    eth_amount,
-    token_with_balance
-)
-
-# DEX 测试 fixtures
-from tests.fixtures.dex_fixture import (
-    dex_test_data,
-    tokenA,
-    tokenB,
-    factory,
-    router,
-    tokens_with_balance,
-    pair_with_liquidity
-)
-
-# Contract Custom 测试 fixtures
-from tests.fixtures.contract_custom_fixture import (
-    contract_custom_test_data,
-    myerc20_token,
-    role_constants
-)
-
-# 清算业务测试 fixtures
-from tests.fixtures.liquidation_fixture import (
-    liquidation_test_data,
-    liquidation_constants,
-    collateral_token,
-    debt_token,
-    liquidation_contract,
-    malicious_attacker,
-    liquidation_environment
-)
-
-# Swap V3 测试 fixtures
-from tests.fixtures.swap_v3_fixture import (
-    swap_v3_test_data,
-    v3_tokens,
-    v3_factory_and_router,
-    v3_liquidity_environment
-)
-
-# 安全高级测试 fixtures
-from tests.fixtures.security_fixture import (
-    security_test_data,
-    erc20_token,
-    staking_contract,
-    timelock_contract,
-    reentrancy_vault,
-    vulnerable_vault
-)
 
 
 @pytest.fixture(scope="session")

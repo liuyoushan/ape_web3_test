@@ -1,0 +1,32 @@
+# ==============================================================================
+# 配置文件模板
+# ==============================================================================
+# 复制为 local.yaml 并填入实际值
+# ==============================================================================
+
+# API 配置
+api:
+  base_url: "https://api.example.com"
+  timeout: 30
+
+# Web3 配置
+web3:
+  chain_id: 31337
+  rpc_url: "http://127.0.0.1:8545"
+
+# CEX 配置（示例）
+cex:
+  binance:
+    api_url: "https://api.binance.com"
+    testnet_url: "https://testnet.binance.vision"
+  
+  okx:
+    api_url: "https://www.okx.com"
+    testnet_url: "https://www.okx.com"
+
+# 测试配置
+test:
+  retry_max: 3
+  retry_delay: 1.0
+  polling_timeout: 120.0
+  polling_interval: 3.0

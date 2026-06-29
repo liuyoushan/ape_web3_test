@@ -253,7 +253,7 @@ def generate_allure_report(show_serve_hint: bool = False, port: int = 8080):
 
 # ==================== 运行测试 ====================
 def run_tests(
-    test_path: str = "tests/",
+    test_path,
     network: str = "ethereum:local",
     verbose: bool = True,
     clean: bool = True,
@@ -268,7 +268,7 @@ def run_tests(
     运行 pytest 测试
     
     Args:
-        test_path: 测试文件或目录路径
+        test_path: 测试文件或目录路径（支持单个字符串或多个路径列表）
         network: 网络配置 (ethereum:local, ethereum:mainnet:http)
         verbose: 是否显示详细输出
         clean: 是否清理缓存
@@ -294,7 +294,11 @@ def run_tests(
     print_network_info(network)
     
     # 构建 pytest 命令
-    cmd = [python_path, "-m", "pytest", str(test_path)]
+    cmd = [python_path, "-m", "pytest"]
+    if isinstance(test_path, list):
+        cmd.extend(test_path)
+    else:
+        cmd.append(str(test_path))
     
     # 详细输出
     if verbose:
@@ -384,9 +388,9 @@ def main():
     
     parser.add_argument(
         "test_path",
-        nargs="?",
-        default="tests/",
-        help="测试文件或目录路径"
+        nargs="*",
+        default=["tests/"],
+        help="测试文件或目录路径（支持多个）"
     )
     
     parser.add_argument(

@@ -1,0 +1,1 @@
+from .fixtures.nft_fixtures import *
