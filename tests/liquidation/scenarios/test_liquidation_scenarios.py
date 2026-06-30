@@ -35,11 +35,14 @@ def test_liquidation_049_normal_workflow(deployer, user1, user2, liquidation_tes
     - 借款人债务清零
     - 清算人获得抵押资产作为奖励
     """
+
+    # 初始化测试数据
     data = liquidation_test_data["case_049_normal_liquidation"]
     debt_amount = parse_ether(str(data["debt_amount"]))
     collateral_amount = parse_ether(str(data["collateral_amount"]))
     adjusted_debt = parse_ether(str(data["adjusted_debt"]))
 
+    # 部署清算合约，传入账户、抵押代币合约地址、债务代币合约地址
     liquidation_contract.setUserPosition(user1, collateral_amount, adjusted_debt, sender=deployer)
 
     actual_reward = adjusted_debt / 10
