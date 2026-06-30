@@ -1,6 +1,8 @@
 from ape import project, accounts
 
+
 def main():
+    """此脚本主要在github actions中部署合约时，调用到"""
     # 使用本地测试链的默认账户（自动解锁）
     sender = accounts.test_accounts[0]
     
