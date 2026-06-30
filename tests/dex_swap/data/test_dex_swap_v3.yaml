@@ -1,3 +1,6 @@
+# DEX V3 集中流动性测试数据
+
+# 集中流动性添加测试用例
 case_055_concentrated_liquidity_add:
-  add_liquidity_full_range: "1000"
-  add_liquidity_narrow_range: "500"
+  add_liquidity_full_range: "1000"   # 全范围添加流动性金额
+  add_liquidity_narrow_range: "500"  # 窄范围添加流动性金额

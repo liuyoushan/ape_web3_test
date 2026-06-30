@@ -1,43 +1,51 @@
+# 清算触发测试用例
+# 用户健康因子低于阈值时触发清算
 case_048_liquidation_trigger:
-  health_factor_warning: 1.2
-  health_factor_liquidation: 1.0
-  collateral_ratio_initial: 1.5
-  debt_amount: 1000
-  collateral_amount: 2000
+  health_factor_warning: 1.2           # 健康因子预警阈值（低于此值警告）
+  health_factor_liquidation: 1.0       # 健康因子清算阈值（低于此值可被清算）
+  collateral_ratio_initial: 1.5        # 初始抵押率（抵押品/债务）
+  debt_amount: 1000                    # 用户债务金额
+  collateral_amount: 2000              # 用户抵押品金额
 
+# 正常清算流程测试用例
 case_049_normal_liquidation:
-  liquidator_reward_pct: 0.1
-  platform_fee_pct: 0.02
-  debt_amount: 1000
-  expected_liquidator_reward: 100
-  collateral_amount: 1100
-  adjusted_debt: 1000
+  liquidator_reward_pct: 0.1           # 清算人奖励比例（10%）
+  platform_fee_pct: 0.02               # 平台手续费比例（2%）
+  debt_amount: 1000                    # 用户债务金额
+  expected_liquidator_reward: 100      # 预期清算人获得的奖励
+  collateral_amount: 1100              # 用户抵押品金额
+  adjusted_debt: 1000                  # 调整后的债务金额（考虑利息等）
 
+# 清算奖励配置测试用例
 case_052_liquidation_reward:
-  bonus_pct: 0.1
-  platform_tax_pct: 0.02
-  platform_address: "0x1111111111111111111111111111111111111111"
+  bonus_pct: 0.1                       # 清算奖励加成比例（10%）
+  platform_tax_pct: 0.02               # 平台抽税比例（2%）
+  platform_address: "0x1111111111111111111111111111111111111111"  # 平台收款地址
 
+# 批量清算测试用例
 case_053_batch_liquidation:
-  user_count: 3
-  total_debt: 3000
+  user_count: 3                        # 批量清算的用户数量
+  total_debt: 3000                     # 总债务金额
 
+# 价格预言机操纵攻击测试用例
 case_054_price_oracle_manipulation:
-  oracle_fake_price_high: 2.0
-  oracle_fake_price_low: 0.5
+  oracle_fake_price_high: 2.0          # 操纵后的虚假高价
+  oracle_fake_price_low: 0.5           # 操纵后的虚假低价
 
+# 重入攻击防护测试用例
 case_055_reentrancy_attack:
-  debt_amount: 1000
-  collateral_amount: 1500
-  reentrancy_attempts: 3
+  debt_amount: 1000                    # 债务金额
+  collateral_amount: 1500              # 抵押品金额
+  reentrancy_attempts: 3               # 重入攻击尝试次数
 
-# case_056 闪电贷价格操纵
+# 闪电贷价格操纵攻击测试用例
 case_056_flash_loan_attack:
-  loan_amount: 100000
-  target_collateral: 2000
-  target_debt: 1000
-  expected_protection: true
+  loan_amount: 100000                  # 闪电贷借款金额
+  target_collateral: 2000              # 目标用户抵押品金额
+  target_debt: 1000                    # 目标用户债务金额
+  expected_protection: true            # 预期是否能成功防护
 
+# 重复清算防护测试用例
 case_057_duplicate_liquidation:
-  debt_amount: 1000
-  collateral_amount: 1500
+  debt_amount: 1000                    # 债务金额
+  collateral_amount: 1500              # 抵押品金额

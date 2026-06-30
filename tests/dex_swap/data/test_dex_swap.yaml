@@ -2,58 +2,67 @@
 # DEX 测试数据
 # ==============================================================================
 common:
-  tokenA_name: "TokenA"
-  tokenA_symbol: "TKA"
-  tokenB_name: "TokenB"
-  tokenB_symbol: "TKB"
+  tokenA_name: "TokenA"              # 交易对代币A名称
+  tokenA_symbol: "TKA"              # 交易对代币A符号
+  tokenB_name: "TokenB"              # 交易对代币B名称
+  tokenB_symbol: "TKB"              # 交易对代币B符号
 
+# TokenA 兑换 TokenB 测试用例
 case_010_swap_tokenA_to_tokenB:
-  mint_amount: "10000 ether"
-  add_liquidity_amount: "1000 ether"
-  swap_amount: "100 ether"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_amount: "1000 ether" # 添加流动性金额
+  swap_amount: "100 ether"           # 兑换金额
 
+# TokenB 兑换 TokenA 测试用例
 case_011_swap_tokenB_to_tokenA:
-  mint_amount: "10000 ether"
-  add_liquidity_amount: "2000 ether"
-  swap_amount: "200 ether"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_amount: "2000 ether" # 添加流动性金额
+  swap_amount: "200 ether"           # 兑换金额
 
+# 添加流动性测试用例
 case_012_add_liquidity:
-  mint_amount: "10000 ether"
-  add_liquidity_amount_a: "1000 ether"
-  add_liquidity_amount_b: "2000 ether"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_amount_a: "1000 ether" # TokenA 添加流动性金额
+  add_liquidity_amount_b: "2000 ether" # TokenB 添加流动性金额
 
+# LP 比例检查测试用例
 case_012_1_lp_percentage_check:
-  mint_amount: "20000 ether"
-  user1_add_a: "1000 ether"
-  user1_add_b: "2000 ether"
-  user2_add_a: "500 ether"
-  user2_add_b: "1000 ether"
+  mint_amount: "20000 ether"         # 铸造代币总量
+  user1_add_a: "1000 ether"          # 用户1添加的TokenA金额
+  user1_add_b: "2000 ether"          # 用户1添加的TokenB金额
+  user2_add_a: "500 ether"           # 用户2添加的TokenA金额
+  user2_add_b: "1000 ether"          # 用户2添加的TokenB金额
 
+# 移除流动性测试用例
 case_013_remove_liquidity:
-  mint_amount: "10000 ether"
-  add_liquidity_amount_a: "1500 ether"
-  add_liquidity_amount_b: "1500 ether"
-  remove_lp_percent: "50%"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_amount_a: "1500 ether" # TokenA 添加流动性金额
+  add_liquidity_amount_b: "1500 ether" # TokenB 添加流动性金额
+  remove_lp_percent: "50%"           # 移除LP的比例
 
+# 滑点控制测试用例
 case_014_slippage_control:
-  mint_amount: "10000 ether"
-  add_liquidity_amount: "3000 ether"
-  swap_amount: "200 ether"
-  max_slippage_allow: "2%"
-  max_slippage_block: "0.1%"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_amount: "3000 ether" # 添加流动性金额
+  swap_amount: "200 ether"           # 兑换金额
+  max_slippage_allow: "2%"           # 允许的最大滑点（正常情况）
+  max_slippage_block: "0.1%"         # 触发拦截的最大滑点（边界情况）
 
+# 手续费结算测试用例
 case_015_fee_settlement:
-  mint_amount: "10000 ether"
-  add_liquidity_amount: "5000 ether"
-  swap_amount: "500 ether"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_amount: "5000 ether" # 添加流动性金额
+  swap_amount: "500 ether"           # 兑换金额
 
+# 多路由跨池兑换测试用例
 case_016_multi_hop_swap:
-  mint_amount: "10000 ether"
-  add_liquidity_ab: "2000 ether"
-  add_liquidity_bc: "2000 ether"
-  swap_amount: "100 ether"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_ab: "2000 ether"     # A-B池添加流动性金额
+  add_liquidity_bc: "2000 ether"     # B-C池添加流动性金额
+  swap_amount: "100 ether"           # 兑换金额
 
+# 大额交易边界测试用例
 case_017_large_trade_boundary:
-  mint_amount: "10000 ether"
-  add_liquidity_amount: "2000 ether"
-  large_swap_amount: "1500 ether"
+  mint_amount: "10000 ether"         # 铸造代币总量
+  add_liquidity_amount: "2000 ether" # 添加流动性金额
+  large_swap_amount: "1500 ether"    # 大额兑换金额（占流动性75%）
