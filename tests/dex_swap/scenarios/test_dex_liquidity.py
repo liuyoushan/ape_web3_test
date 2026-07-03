@@ -3,7 +3,7 @@
 【DEX 场景】流动性管理测试
 ==============================================================================
 """
-try:
+try: 
     import allure
 except ImportError:
     class dummy_allure:
