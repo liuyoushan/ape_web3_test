@@ -263,7 +263,7 @@ def test_erc20_003_insufficient_balance_transfer(erc20_token, deployer, user1):
 
 并发压测、混沌故障注入、线上全链路监控：<https://github.com/liuyoushan/blockchain-perf-test>
 
-## 报告目录下起服务查git actions的报告：
+## 报告目录下起服务查allure的报告：
 
 ```
 python -m http.server 8080
