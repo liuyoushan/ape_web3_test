@@ -4,7 +4,7 @@ CEX API 客户端封装
 ==============================================================================
 """
 
-from tests.api.apis.base_client import CEXBaseClient
+from tests.cex.api.apis.base_client import CEXBaseClient
 
 __all__ = [
     "CEXBaseClient",

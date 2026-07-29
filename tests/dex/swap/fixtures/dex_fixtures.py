@@ -7,7 +7,7 @@ import pytest
 import yaml
 from pathlib import Path
 from ape import project
-from tests.dex_swap.apis import MiniSwapFactoryAPI, MiniSwapRouterAPI, MiniSwapPairAPI
+from tests.dex.swap.apis import MiniSwapFactoryAPI, MiniSwapRouterAPI, MiniSwapPairAPI
 
 
 @pytest.fixture(scope="function")

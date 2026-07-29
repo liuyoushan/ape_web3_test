@@ -7,7 +7,7 @@ import pytest
 import yaml
 from pathlib import Path
 from ape import project
-from tests.liquidation.apis import LiquidationAPI
+from tests.dex.liquidation.apis import LiquidationAPI
 from framework.core.formatters import parse_ether, format_ether
 
 

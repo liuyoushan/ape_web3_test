@@ -14,15 +14,41 @@ web3:
   chain_id: 31337
   rpc_url: "http://127.0.0.1:8545"
 
-# CEX 配置（示例）
+# ==============================================================================
+# CEX 配置 - 三大模块共用（资金链路 / 订单系统 / 风控体系）
+# ==============================================================================
 cex:
-  binance:
-    api_url: "https://api.binance.com"
-    testnet_url: "https://testnet.binance.vision"
+  # 统一测试网配置（三大模块共用此 base_url + 密钥）
+  base_url: "https://testnet.binance.vision"
+  timeout: 30.0
+  recv_window: 5000
   
-  okx:
-    api_url: "https://www.okx.com"
-    testnet_url: "https://www.okx.com"
+  # 子模块专用配置
+  fund:
+    # 资金链路：充提确认数、阈值、费率等
+    deposit_confirmations: 3
+    withdraw_min_amount: 0.0001
+    withdraw_max_amount: 100.0
+    large_withdraw_threshold: 50.0
+    audit_timeout_hours: 48
+  
+  order:
+    # 订单系统：撮合参数、手续费、K线周期等
+    maker_fee_rate: 0.001      # 0.1%
+    taker_fee_rate: 0.0015     # 0.15%
+    limit_order_max_hours: 24  # 限价单最长挂单时间
+    market_order_slippage: 0.01  # 市价单允许滑点 1%
+  
+  risk:
+    # 风控体系：KYC 等级、冻结规则、审核阈值等
+    kyc_required_for_spot: 1
+    kyc_required_for_futures: 2
+    kyc_required_for_large_transfer: 3
+    auto_freeze_triggers:
+      - "abnormal_trade_pattern"
+      - "blacklist_address"
+      - "repeated_small_transfers"
+    audit_log_retention_days: 365
 
 # 测试配置
 test:

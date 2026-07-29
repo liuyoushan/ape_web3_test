@@ -1,0 +1,32 @@
+# ==============================================================================
+# CEX 风控体系测试数据（32 用例精简版）
+# ==============================================================================
+
+# 通用配置
+common:
+  risk_log_retention_days: 365
+
+# ---------- 风控核心接口 (case_025 ~ case_028) ----------
+risk:
+  case_025:
+    key_types: ["READONLY", "TRADE", "WITHDRAW"]
+    expected_blocked:
+      READONLY: ["TRADE", "WITHDRAW"]
+      TRADE: ["WITHDRAW"]
+  
+  case_026:
+    whitelist_ips:
+      - "192.168.1.100"
+      - "10.0.0.1"
+    blocked_ip: "203.0.113.5"
+  
+  case_027:
+    freeze_triggers:
+      - "abnormal_trade_pattern"
+      - "blacklist_address_transfer"
+    expected_blocked_actions: ["withdraw", "transfer"]
+  
+  case_028:
+    threshold_large: 100000  # 超阈值触发审核
+    split_detect: 50000       # 拆分识别
+    audit_timeout_hours: 48

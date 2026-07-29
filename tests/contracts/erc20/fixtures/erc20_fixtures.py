@@ -7,7 +7,7 @@ import pytest
 import yaml
 from pathlib import Path
 from ape import project
-from tests.erc20.apis import ERC20API
+from tests.contracts.erc20.apis import ERC20API
 
 
 @pytest.fixture(scope="module")

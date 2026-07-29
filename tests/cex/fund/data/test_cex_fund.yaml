@@ -1,0 +1,106 @@
+# ==============================================================================
+# CEX 资金链路测试数据（32 用例精简版）
+# ==============================================================================
+
+# 通用配置
+common:
+  base_url: "https://testnet.binance.vision"
+  symbol: "BTCUSDT"
+  coin: "BTC"
+  quote_coin: "USDT"
+
+# ---------- 账户模块 (case_001 ~ case_004) ----------
+account:
+  case_001:
+    verify_fields: ["asset", "free", "locked", "freeze"]
+    precision: 8
+  
+  case_002:
+    key_levels: ["READONLY", "TRADE", "WITHDRAW"]
+    expected_blocked:
+      READONLY: ["TRADE", "WITHDRAW"]
+      TRADE: ["WITHDRAW"]
+  
+  case_003:
+    expected_field: "subAccounts"
+    min_count: 0
+  
+  case_004:
+    verify_fields: ["totalWalletBalance", "totalUnrealizedProfit", "totalMarginBalance"]
+
+# ---------- 充币模块 (case_013 ~ case_015) + 差异化 (case_029, case_030) ----------
+deposit:
+  case_013:
+    coin: "BTC"
+    status: "Success"
+  
+  case_014:
+    coin: "BTC"
+    address_format: "0x..."
+    min_length: 42
+  
+  case_015:
+    tx_hash: "0xabc123def456"
+    expected_status: "Confirmed"
+  
+  case_029:
+    amount: 0.001
+    rollback_block: 100
+    expected_balance_delta: -0.001
+  
+  case_030:
+    amount: 0.001
+    tx_hash: "0xduplicate789"
+    duplicate_count: 2
+
+# ---------- 提币模块 (case_016 ~ case_020) + 差异化 (case_031) ----------
+withdraw:
+  case_016:
+    amount: 0.0005
+    coin: "BTC"
+    address: "0xRecipientAddress000000000000"
+  
+  case_017:
+    withdraw_id: "wd_000001"
+    expected_statuses: ["Submitted", "AwaitingApproval", "Processing", "Success"]
+  
+  case_018:
+    withdraw_id: "wd_000002"
+    cancel_status: "Canceled"
+  
+  case_019:
+    coin: "BTC"
+    limit: 10
+  
+  case_020:
+    amount: 0.0005
+    gas_price: 0.000001  # 极低 Gas，预期被拦截
+    expected_blocked: true
+  
+  case_031:
+    amount: 0.0005
+    chain_fail_reason: "network_timeout"
+    expected_refund: true
+
+# ---------- 划转模块 (case_021 ~ case_024) ----------
+transfer:
+  case_021:
+    asset: "BTC"
+    amount: 0.0001
+    from_account: "SPOT"
+    to_account: "FUTURES"
+  
+  case_022:
+    asset: "BTC"
+    amount: 0.0001
+    from_account: "FUTURES"
+    to_account: "SPOT"
+  
+  case_023:
+    asset: "USDT"
+    limit: 10
+  
+  case_024:
+    asset: "BTC"
+    amount: 0.0001
+    tolerance: 1e-8

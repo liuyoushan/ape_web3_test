@@ -1,0 +1,61 @@
+# ==============================================================================
+# CEX 订单系统测试数据（32 用例精简版）
+# ==============================================================================
+
+# 通用配置
+common:
+  symbol: "BTCUSDT"
+  quote_order_qty: 0.0001
+  base_order_qty: 10
+  price_precision: 2
+  quantity_precision: 6
+
+# ---------- 现货交易 (case_005 ~ case_012) ----------
+spot:
+  case_005:
+    side: "BUY"
+    type: "LIMIT"
+    price: 50000.00
+    quantity: 0.001
+    time_in_force: "GTC"
+  
+  case_006:
+    side: "BUY"
+    type: "MARKET"
+    quote_order_qty: 50
+  
+  case_007:
+    side: "SELL"
+    type: "LIMIT"
+    price: 60000.00  # 高位挂单，保证不成交
+    quantity: 0.001
+  
+  case_008:
+    order_id: 123456789
+    expected_fields: ["orderId", "symbol", "status", "executedQty"]
+  
+  case_009:
+    symbol: "BTCUSDT"
+    limit: 20
+  
+  case_010:
+    symbol: "BTCUSDT"
+    expected_status: "NEW"
+  
+  case_011:
+    symbol: "BTCUSDT"
+  
+  case_012:
+    side: "SELL"
+    type: "MARKET"
+    quantity: 10.0  # 大于盘口深度，测试边界
+
+# ---------- 并发场景 (case_032) ----------
+concurrent:
+  case_032:
+    order_count: 50
+    accounts_count: 5
+    price_range:
+      min: 49000.00
+      max: 51000.00
+    max_concurrent_per_account: 20
