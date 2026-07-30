@@ -28,6 +28,108 @@ ALLURE_RESULTS_DIR = ROOT_DIR / "report" / "allure-results"
 ALLURE_REPORT_DIR = ROOT_DIR / "report" / "allure-report"
 PYTEST_CACHE_DIR = ROOT_DIR / ".pytest_cache"
 
+# ==================== 企业级业务域映射（项目维度） ====================
+# 支持通过 --project 一键运行对应业务域的全部测试，等价于 -m 标记 + 目录组合
+PROJECT_MAPPING = {
+    # contracts - 合约层（ERC20 + 自定义合约）
+    "contracts": {
+        "desc": "合约基础层（ERC20 代币标准 + 自定义合约逻辑）",
+        "paths": ["tests/contracts/"],
+        "marker": None,
+        "modules": ["erc20", "custom"],
+    },
+    "erc20": {
+        "desc": "ERC20 代币标准测试",
+        "paths": ["tests/contracts/erc20/"],
+        "marker": "ERC20",
+        "modules": ["erc20"],
+    },
+    "custom": {
+        "desc": "自定义合约逻辑测试（权限、参数、暂停机制）",
+        "paths": ["tests/contracts/custom/"],
+        "marker": None,
+        "modules": ["custom"],
+    },
+
+    # dex - DEX 业务层
+    "dex": {
+        "desc": "DEX 业务层（Swap 交易 + 清算 + NFT）",
+        "paths": ["tests/dex/"],
+        "marker": None,
+        "modules": ["swap", "liquidation", "nft"],
+    },
+    "swap": {
+        "desc": "DEX 交易核心（MiniSwap Factory/Pair/Router）",
+        "paths": ["tests/dex/swap/"],
+        "marker": "DexSwap",
+        "modules": ["swap"],
+    },
+    "liquidation": {
+        "desc": "清算业务测试",
+        "paths": ["tests/dex/liquidation/"],
+        "marker": None,
+        "modules": ["liquidation"],
+    },
+    "nft": {
+        "desc": "NFT 业务测试（ERC721/ERC1155）",
+        "paths": ["tests/dex/nft/"],
+        "marker": None,
+        "modules": ["nft"],
+    },
+
+    # cex - CEX 业务层
+    "cex": {
+        "desc": "CEX 中心化交易所（资金链路 + 订单系统 + 风控体系）",
+        "paths": ["tests/cex/"],
+        "marker": "CEX",
+        "modules": ["fund", "order", "risk"],
+    },
+    "cex_fund": {
+        "desc": "CEX 资金链路（充币/提币/划转/账户）",
+        "paths": ["tests/cex/fund/"],
+        "marker": "CEX_Fund",
+        "modules": ["fund"],
+    },
+    "cex_order": {
+        "desc": "CEX 订单系统（现货下单/撤单/撮合）",
+        "paths": ["tests/cex/order/"],
+        "marker": "CEX_Order",
+        "modules": ["order"],
+    },
+    "cex_risk": {
+        "desc": "CEX 风控体系（权限/白名单/资损防护）",
+        "paths": ["tests/cex/risk/"],
+        "marker": "CEX_Risk",
+        "modules": ["risk"],
+    },
+
+    # security - 安全测试
+    "security": {
+        "desc": "安全测试（重入/溢出/授权/代理升级/时间锁）",
+        "paths": ["tests/security/"],
+        "marker": "Security",
+        "modules": ["security"],
+    },
+
+    # all - 全部业务域
+    "all": {
+        "desc": "全部测试（合约 + DEX + CEX + 安全）",
+        "paths": ["tests/contracts/", "tests/dex/", "tests/cex/", "tests/security/"],
+        "marker": None,
+        "modules": ["all"],
+    },
+}
+
+
+def list_available_projects() -> str:
+    """列出所有可用的业务域，用于 --help 展示"""
+    lines = []
+    for key, info in PROJECT_MAPPING.items():
+        modules = ", ".join(info["modules"])
+        marker = f" [marker: {info['marker']}]" if info["marker"] else ""
+        lines.append(f"  {key:<15} {info['desc']}  (modules: {modules}){marker}")
+    return "\n".join(lines)
+
 # 项目 venv 环境路径
 VENV_PYTHON_PATH = ROOT_DIR / ".venv" / "bin" / "python"
 
@@ -251,6 +353,51 @@ def generate_allure_report(show_serve_hint: bool = False, port: int = 8080):
     except subprocess.CalledProcessError as e:
         log_error(f"Allure 报告生成失败: {e.stderr}")
 
+# ==================== 业务域解析 ====================
+def resolve_project(project_name: str, test_path, marker):
+    """
+    根据 --project 解析对应的 test_path 和 marker
+    
+    优先级：
+      1. 显式传 test_path > --project 自动推导
+      2. --project 的 marker 会与 -m 参数合并（AND）
+    """
+    resolved_path = test_path
+    resolved_marker = marker
+    project_info = None
+
+    if project_name:
+        project_name = project_name.lower()
+        if project_name not in PROJECT_MAPPING:
+            available = list(PROJECT_MAPPING.keys())
+            raise ValueError(
+                f"未知项目: {project_name}\n"
+                f"可选值: {', '.join(available)}\n\n"
+                f"可用项目明细：\n{list_available_projects()}"
+            )
+        project_info = PROJECT_MAPPING[project_name]
+        # 只有当 test_path 是默认值（未显式指定路径）时才覆盖
+        if (isinstance(test_path, list) and test_path == ["tests/"]) or (
+            isinstance(test_path, str) and test_path.endswith("tests/")
+        ):
+            resolved_path = project_info["paths"]
+            log_info(f"📦 使用项目映射：{project_name} → {project_info['desc']}")
+            log_info(f"   测试路径: {', '.join(project_info['paths'])}")
+        else:
+            log_warning(f"--project={project_name} 指定，但 test_path 已显式设置，使用显式 test_path")
+
+        # 合并 marker（AND）
+        project_marker = project_info.get("marker")
+        if project_marker and resolved_marker:
+            resolved_marker = f"({project_marker}) and ({resolved_marker})"
+            log_info(f"🏷️  合并标记筛选: {resolved_marker}")
+        elif project_marker:
+            resolved_marker = project_marker
+            log_info(f"🏷️  项目标记筛选: {resolved_marker}")
+
+    return resolved_path, resolved_marker, project_info
+
+
 # ==================== 运行测试 ====================
 def run_tests(
     test_path,
@@ -262,7 +409,8 @@ def run_tests(
     xfail: bool = False,
     serve_report: bool = False,
     report_port: int = 8080,
-    capture: bool = False
+    capture: bool = False,
+    project: str = None,
 ):
     """
     运行 pytest 测试
@@ -277,10 +425,15 @@ def run_tests(
         xfail: 是否允许预期失败的测试通过
         serve_report: 是否启动 Allure 报告服务
         report_port: Allure 服务端口
+        capture: 是否禁用 stdout 捕获
+        project: 业务域一键运行（见 PROJECT_MAPPING）
     """
     start_time = datetime.now()
     python_path = get_python_path()
     allure_available = has_allure_pytest(python_path)
+
+    # 业务域解析（在清理缓存之前）
+    test_path, marker, project_info = resolve_project(project, test_path, marker)
     
     # 清理缓存
     if clean:
@@ -292,6 +445,16 @@ def run_tests(
     
     # 打印网络信息
     print_network_info(network)
+
+    # 打印业务域信息
+    if project_info:
+        print(f"\n{Color.CYAN}{'📦 业务域'.center(70)}{Color.RESET}")
+        print(f"{Color.GREEN}  项目:    {project or 'custom'}{Color.RESET}")
+        print(f"{Color.GREEN}  描述:    {project_info['desc']}{Color.RESET}")
+        print(f"{Color.GREEN}  子模块:  {', '.join(project_info['modules'])}{Color.RESET}")
+        if project_info.get("marker"):
+            print(f"{Color.GREEN}  标记:    {project_info['marker']}{Color.RESET}")
+        print(f"{Color.PURPLE}{'='*70}{Color.RESET}\n")
     
     # 构建 pytest 命令
     cmd = [python_path, "-m", "pytest"]
@@ -362,27 +525,30 @@ def run_tests(
 def main():
     parser = argparse.ArgumentParser(
         prog="run_tests.py",
-        description="企业级 Web3 测试运行器",
+        description="企业级 Web3 测试运行器（支持按业务域一键运行）",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-示例用法:
-  # 运行所有测试
-  python run_tests.py
+        epilog=f"""
+📌 一、按业务域一键运行（--project）:
+  python run_tests.py --project contracts     # 合约基础层
+  python run_tests.py --project dex           # DEX 业务层
+  python run_tests.py --project cex           # CEX 中心化交易所
+  python run_tests.py --project security      # 安全测试
+  python run_tests.py --project cex_fund      # CEX 资金链路
+  python run_tests.py --project all           # 全部测试
 
-  # 运行指定测试文件
-  python run_tests.py tests/test_erc20.py
+📌 二、业务域 + 标记组合筛选:
+  python run_tests.py --project cex -m "P0"
+  python run_tests.py --project contracts -m "P0 and ERC20"
 
-  # 运行指定测试用例
-  python run_tests.py tests/test_erc20.py::test_erc20_001_metadata_verification
+📌 三、显式指定路径（优先级高于 --project）:
+  python run_tests.py tests/contracts/erc20/scenarios/
+  python run_tests.py tests/cex/fund/scenarios/test_account.py::test_case_001_account_info
 
-  # 指定网络运行
-  python run_tests.py --network ethereum:mainnet:http
+📌 四、指定网络运行:
+  python run_tests.py --project cex --network ethereum:local
 
-  # 运行带有特定标记的测试
-  python run_tests.py -m "P0 and ERC20"
-
-  # 不生成报告
-  python run_tests.py --no-report
+可用 --project 列表：
+{list_available_projects()}
         """
     )
     
@@ -452,9 +618,29 @@ def main():
         default=False,
         help="显示测试中的 print 输出（禁用 stdout 捕获）"
     )
-    
+
+    parser.add_argument(
+        "-p", "--project",
+        default=None,
+        help="按业务域一键运行，可选值见下方 epilog 列表，如: contracts/dex/cex/cex_fund"
+    )
+
+    parser.add_argument(
+        "--list-projects",
+        action="store_true",
+        default=False,
+        help="列出所有可用的业务域（project）并退出"
+    )
+
     args = parser.parse_args()
-    
+
+    # 仅列出可用项目
+    if args.list_projects:
+        print("\n📦 可用业务域列表（--project 参数）：\n")
+        print(list_available_projects())
+        print()
+        sys.exit(0)
+
     # 运行测试
     exit_code = run_tests(
         test_path=args.test_path,
@@ -466,7 +652,8 @@ def main():
         xfail=args.runxfail,
         serve_report=args.serve,
         report_port=args.port,
-        capture=args.capture
+        capture=args.capture,
+        project=args.project,
     )
     
     sys.exit(exit_code)

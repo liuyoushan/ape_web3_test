@@ -1,19 +1,21 @@
-# Web3 智能合约自动化测试框架
+# Web3 & CEX 全栈自动化测试框架
 
-一套基于 ApeWorX 的企业级智能合约自动化测试解决方案，覆盖 ERC20、DEX、权限控制等核心区块链业务场景。
+一套企业级自动化测试解决方案，覆盖 **智能合约层（ERC20/DEX/Custom）、DEX 业务层、CEX 中心化交易层** 三大业务域，支持按项目维度一键运行。
 
 ***
 
 ## 项目概述
 
-本项目提供标准化的智能合约测试架构，支持数据驱动测试、事件断言、异常场景覆盖等企业级测试能力：
+本项目提供标准化的全栈测试架构，支持合约测试与 CEX 接口测试统一管理：
 
 | 特性       | 说明                                                     |
 | -------- | ------------------------------------------------------ |
 | **测试框架** | ApeWorX + Pytest 企业级自动化测试体系                            |
 | **合约覆盖** | ERC20(RBAC)、Uniswap 式 DEX(Factory/Pair/Router)、自定义业务合约 |
+| **CEX 覆盖** | 资金链路（充币/提币/划转）、订单系统、风控体系（API 权限/资损防护）          |
 | **用例设计** | 功能测试与安全测试分层设计，覆盖正向与异常场景                                |
 | **断言体系** | 链上事件校验、余额变化验证、权限边界检查、异常 revert 验证                      |
+| **业务域管理** | `--project` 一键运行对应业务域（contracts/dex/cex/cex_fund 等）        |
 | **架构设计** | 四层架构（框架层/模块层/数据层/用例层），模块化解耦                            |
 
 ***
@@ -44,70 +46,56 @@ ape-demo/
 │   │   ├── retry_helper.py        # 重试机制
 │   │   ├── polling_helper.py       # 轮询机制
 │   │   └── test_data_factory.py    # 测试数据工厂
-│   ├── api/                        # HTTP API 客户端（CEX 测试）
+│   ├── api/                        # HTTP API 客户端
 │   │   └── http_client.py
+│   ├── cex/                        # CEX 专属工具（与合约断言分离）
+│   │   ├── base_client.py         # HMAC-SHA256 签名基础客户端
+│   │   ├── cex_assertions.py      # CEX 专属断言
+│   │   └── mock_chain.py          # 模拟链上事件（回滚/重复 TxHash）
 │   └── web3/                       # Web3 交互封装
 │       └── ape_client.py
-├── tests/                          # 测试用例层（四层架构）
+├── tests/                          # 测试用例层（四大业务域）
 │   ├── conftest.py                 # pytest 全局共享 Fixture
-│   ├── erc20/                      # ERC20 模块
-│   │   ├── apis/                   # API 原子封装
-│   │   ├── fixtures/               # Fixture 环境准备
-│   │   ├── data/                   # 测试数据
-│   │   └── scenarios/              # 测试用例
-│   ├── dex_swap/                   # DEX 模块
-│   │   ├── apis/
-│   │   ├── fixtures/
-│   │   ├── data/
-│   │   └── scenarios/
-│   ├── liquidation/                # 清算模块
-│   │   ├── apis/
-│   │   ├── fixtures/
-│   │   ├── data/
-│   │   └── scenarios/
-│   ├── security/                   # 安全模块
-│   │   ├── apis/
-│   │   ├── fixtures/
-│   │   ├── data/
-│   │   └── scenarios/
-│   ├── nft/                        # NFT 模块
-│   │   ├── fixtures/
-│   │   ├── data/
-│   │   └── scenarios/
-│   ├── contract_custom/            # 自定义合约模块
-│   │   ├── apis/
-│   │   ├── fixtures/
-│   │   ├── data/
-│   │   └── scenarios/
-│   └── api/                        # CEX API 模块（预留）
+│   ├── contracts/                  # ✅ 合约基础层
+│   │   ├── erc20/                  #   ERC20 代币标准测试
+│   │   └── custom/                 #   自定义合约逻辑（权限/参数/暂停）
+│   ├── dex/                        # ✅ DEX 业务层
+│   │   ├── swap/                   #   MiniSwap 交易核心
+│   │   ├── liquidation/            #   清算业务
+│   │   └── nft/                    #   NFT 业务
+│   ├── cex/                        # ✅ CEX 中心化交易层
+│   │   ├── api/                    #   CEX 基础设施（签名客户端）
+│   │   ├── fund/                   #   资金链路（充币/提币/划转/账户）
+│   │   ├── order/                  #   订单系统（现货下单/撤单）
+│   │   └── risk/                   #   风控体系（权限/资损防护）
+│   └── security/                   # ✅ 安全测试（通用合约级安全）
 │       ├── apis/
 │       ├── fixtures/
+│       ├── data/
 │       └── scenarios/
 ├── logs/                           # 运行日志目录
-├── run_tests.py                    # 统一测试运行入口
-└── case_list                       # 完整测试用例清单
+├── run_tests.py                    # 统一测试运行入口（支持 --project 一键按业务域运行）
+├── case_list                       # 合约/DEX 测试用例清单
+└── cex_case_list                   # CEX 测试用例清单（28 接口 + 4 资损场景）
 ```
 
 ### 四层架构说明
 
-| 层级      | 目录                    | 职责                                            |
-| ------- | --------------------- | --------------------------------------------- |
-| **框架层** | `framework/`          | 原子能力：日志、格式化、断言、重试、轮询、配置                       |
-| **模块层** | `tests/{module}/`     | 按业务域划分：erc20、dex\_swap、liquidation、security 等 |
-| **数据层** | `{module}/data/`      | YAML 测试数据，与代码分离                               |
-| **用例层** | `{module}/scenarios/` | 具体测试用例实现                                      |
+| 层级      | 目录                    | 职责                                                         |
+| ------- | --------------------- | ---------------------------------------------------------- |
+| **框架层** | `framework/`          | 原子能力：日志、格式化、断言、重试、轮询、配置、CEX 签名客户端              |
+| **模块层** | `tests/{domain}/{module}/` | 按**业务域**划分：contracts（合约层）/dex / cex / security 四大域 |
+| **数据层** | `{module}/data/`      | YAML 测试数据，与代码分离                                             |
+| **用例层** | `{module}/scenarios/` | 具体测试用例实现                                                    |
 
-### 各模块说明
+### 四大业务域说明
 
-| 模块                 | 目录                           | 职责                        |
-| ------------------ | ---------------------------- | ------------------------- |
-| `erc20/`           | apis/fixtures/data/scenarios | ERC20 代币测试（转账、授权、铸造、RBAC） |
-| `dex_swap/`        | apis/fixtures/data/scenarios | DEX 交易所测试（Swap、流动性、手续费）   |
-| `liquidation/`     | apis/fixtures/data/scenarios | 清算业务测试（清算触发、奖励计算）         |
-| `security/`        | apis/fixtures/data/scenarios | 安全测试（重入、整数溢出、闪电贷）         |
-| `nft/`             | fixtures/data/scenarios      | NFT 测试（ERC721/ERC1155）    |
-| `contract_custom/` | apis/fixtures/data/scenarios | 自定义合约测试                   |
-| `api/`             | apis/fixtures/scenarios      | CEX API 测试（预留）            |
+| 业务域         | 子模块                                  | 职责                                         | 对应 `--project` 值          |
+| ----------- | ------------------------------------ | ------------------------------------------ | -------------------------- |
+| **contracts** | `contracts/erc20/`、`contracts/custom/` | 合约基础层：ERC20 代币标准 + 自定义合约逻辑           | contracts / erc20 / custom |
+| **dex**       | `dex/swap/`、`dex/liquidation/`、`dex/nft/` | DEX 业务层：交易核心 + 清算 + NFT              | dex / swap / liquidation / nft |
+| **cex**       | `cex/fund/`、`cex/order/`、`cex/risk/` | CEX 业务层：资金链路 + 订单系统 + 风控体系             | cex / cex_fund / cex_order / cex_risk |
+| **security**  | `security/`                          | 通用安全层：重入、溢出、授权、代理升级、时间锁                   | security                   |
 
 ***
 
@@ -133,32 +121,41 @@ ape plugins install solidity anvil
 
 ### 运行测试
 
-本项目提供 `run_tests.py` 作为统一的测试运行入口：
+本项目提供 `run_tests.py` 作为统一的测试运行入口，支持按 **业务域（--project）** 一键运行：
 
 ```bash
-# 运行所有测试
-python3 run_tests.py
+# ============================================================
+# 📦 方式一：按业务域一键运行（推荐，企业级常用）
+# ============================================================
+python3 run_tests.py -s --project contracts    # 合约基础层
+python3 run_tests.py -s --project dex          # DEX 业务层
+python3 run_tests.py -s --project cex          # CEX 中心化交易所
+python3 run_tests.py -s --project cex_fund     # 只跑 CEX 资金链路
+python3 run_tests.py -s --project security     # 安全测试
+python3 run_tests.py -s --project all          # 全部业务域
 
-# 运行指定测试文件
-python3 run_tests.py tests/erc20/scenarios/
+# 查看所有可用业务域
+python3 run_tests.py --list-projects
 
-# 运行特定用例
-python3 run_tests.py tests/erc20/scenarios/test_erc20_metadata.py::test_erc20_001_metadata_verification
+# ============================================================
+# 🔍 方式二：业务域 + 优先级标记 组合筛选
+# ============================================================
+python3 run_tests.py -s --project cex -m "P0"            # CEX 所有 P0 用例
+python3 run_tests.py -s --project contracts -m "P0"      # 合约层所有 P0
 
-# 指定网络运行
-python3 run_tests.py --network ethereum:local
+# ============================================================
+# 🛠️  方式三：显式指定路径（优先级最高）
+# ============================================================
+python3 run_tests.py -s tests/contracts/erc20/scenarios/
+python3 run_tests.py -s tests/cex/fund/scenarios/test_account.py::test_case_001_account_info
 
-# 运行带有特定标记的测试
-python3 run_tests.py -m "P0 and ERC20"
-
-# 显示测试中的 print 输出
-python3 run_tests.py -s
-
-# 不生成 Allure 报告
-python3 run_tests.py --no-report
-
-# 显示帮助信息
-python3 run_tests.py --help
+# ============================================================
+# ⚙️ 其他常用参数
+# ============================================================
+python3 run_tests.py -s --network ethereum:local    # 指定网络
+python3 run_tests.py -s --no-report                  # 不生成 Allure 报告
+python3 run_tests.py --help                          # 查看全部帮助
+python3 run_tests.py -s                          # 打印print
 ```
 
 **备用方式**：直接使用 Ape 框架（不推荐）
@@ -168,7 +165,7 @@ python3 run_tests.py --help
 ape test
 
 # 运行特定模块测试
-ape test tests/erc20/scenarios/ -v
+ape test tests/contracts/erc20/scenarios/ -v
 
 # 运行特定用例
 ape test -k "test_erc20_001" -v
@@ -192,15 +189,18 @@ ape test -k "test_erc20_001" -v
 
 ### 测试用例分类
 
-| 模块          | 用例数量 | 说明                        |
-| ----------- | ---- | ------------------------- |
-| ERC20 基础标准  | 10   | 代币转账、授权、铸造、销毁、RBAC 权限     |
-| DEX 去中心化交易所 | 8    | Swap、流动性添加/移除、滑点控制、手续费    |
-| 自定义业务合约     | 10   | 权限控制、参数配置、暂停恢复、黑名单        |
-| 高阶安全场景      | 12   | 重入防护、整数溢出、授权安全、链上事件       |
-| NFT/SFT     | 10   | ERC721/ERC1155 铸造、转账、交易场景 |
-| 清算业务        | 11   | 清算触发、流程、奖励、安全防护           |
-| Uniswap V3  | 10   | 集中流动性、多费率、TWAP 预言机        |
+| 业务域         | 模块          | 用例数量 | 说明                        |
+| ----------- | ----------- | ---- | ------------------------- |
+| **contracts** | ERC20 基础标准  | 10   | 代币转账、授权、铸造、销毁、RBAC 权限     |
+| **contracts** | 自定义业务合约     | 10   | 权限控制、参数配置、暂停恢复、黑名单        |
+| **dex**       | DEX 去中心化交易所 | 8    | Swap、流动性添加/移除、滑点控制、手续费    |
+| **dex**       | 清算业务        | 11   | 清算触发、流程、奖励、安全防护           |
+| **dex**       | NFT/SFT     | 10   | ERC721/ERC1155 铸造、转账、交易场景 |
+| **cex**       | CEX 资金链路    | 19   | 充币3 + 提币5 + 划转4 + 账户4 + 资损4 |
+| **cex**       | CEX 订单系统    | 9    | 现货下单/撤单/查询/撮合               |
+| **cex**       | CEX 风控体系    | 4    | API 权限、IP 白名单、冻结、大额审核      |
+| **security**  | 高阶安全场景      | 12   | 重入防护、整数溢出、授权安全、代理升级、时间锁  |
+| 合计          |             | **84+** |                           |
 
 ### YAML 测试数据格式
 
@@ -272,6 +272,7 @@ python -m http.server 8080
 ## 相关资源
 
 - [ApeWorX 官方文档](https://docs.apeworx.io/)
-- [完整用例清单](case_list)
+- [合约/DEX 用例清单](case_list)
+- [CEX 用例清单（28 接口 + 4 资损场景）](cex_case_list)
 - [合约源码目录](contracts/)
 
