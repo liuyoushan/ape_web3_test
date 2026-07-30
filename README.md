@@ -269,10 +269,81 @@ def test_erc20_003_insufficient_balance_transfer(erc20_token, deployer, user1):
 python -m http.server 8080
 ```
 
+***
+
+## 🤖 AI 集成规划
+
+> 本章节说明测试框架与 AI 工具的集成思路和未来规划。
+
+### 为什么当前不直接集成？
+
+**核心判断**：AI 辅助测试的价值需要**真实业务数据**才能充分体现。当前框架处于建设初期，直接集成 AI 容易产生"伪效果"——AI 在缺乏真实场景约束下生成的用例和分析结果质量不稳定，无法体现 AI 的真正价值。
+
+**采取的策略**：
+1. **先搭框架，后接 AI**：优先完成测试框架的核心能力建设，确保测试用例、日志、数据的质量
+2. **独立验证，双向对接**：AI 能力在独立的 `test-ai-rag-workflow` 仓库中验证，成熟后再对接主框架
+3. **预留接口，平滑接入**：在框架设计时预留 AI 扩展点，未来可无侵入式集成
+
+### 预留的 AI 扩展点
+
+框架设计时已考虑 AI 集成需求，预留以下扩展接口（当前为设计规范，非代码实现）：
+
+| 扩展点 | 位置 | 功能 | 对接时机 |
+|-------|------|------|---------|
+| **用例生成接口** | `framework/core/case_generator.py` | 接收 AI 生成的用例格式，自动转换为 pytest 测试代码 | 当 AI 用例生成准确率 > 85% 时 |
+| **日志分析 Hook** | `framework/core/log_analyzer.py` | 测试执行失败时自动触发 AI 分析，返回根因和修复建议 | 当 Bad Case 知识库覆盖 > 80% 错误类型时 |
+| **知识库对接点** | `framework/core/knowledge_base.py` | 将测试结果自动沉淀到 AI 知识库，形成闭环 | 当 CI/CD 流水线稳定运行后 |
+| **智能数据工厂** | `framework/core/smart_data_factory.py` | 根据接口定义自动生成测试数据（边界值、异常值） | 当测试数据规范完善后 |
+
+### AI 技术选型方向
+
+| 场景 | 技术方案 | 选型理由 |
+|------|---------|---------|
+| **用例生成** | RAG + 知识库检索 | 基于历史用例格式生成，保证风格一致性 |
+| **日志分析** | 分类模型 + 规则引擎 | 匹配已知错误模式，快速定位根因 |
+| **智能推荐** | Embedding 相似度匹配 | 推荐相关测试用例和历史解决方案 |
+
+### 与 AI 知识库仓库的关系
+
+```
+ape-demo (主框架)  ←→  test-ai-rag-workflow (AI 配置库)
+     │                        │
+     │  测试用例执行结果          │  AI 能力验证
+     │  异常日志                │  用例生成效果
+     │                        │  日志分析准确率
+     └──────── 数据双向流通 ────────┘
+```
+
+**当前状态**：
+- ✅ `test-ai-rag-workflow` 已完成三层架构（知识库 + Skills + Workflow）搭建
+- ✅ 已沉淀 68 个 Golden Case 和 12 类 Bad Case
+- ✅ 在用例生成、日志分析场景下验证通过
+- ⏳ 待主框架稳定后，评估 AI 能力成熟度并决定集成时机
+
+### 集成时机判断标准
+
+当满足以下条件时，启动 AI 集成工作：
+
+- [ ] 测试框架核心功能稳定（当前进行中）
+- [ ] 测试用例覆盖核心业务场景（覆盖率 > 90%）
+- [ ] AI 知识库沉淀足够样本（Golden Case > 100，Bad Case > 50）
+- [ ] AI 用例生成准确率达到可接受水平（> 85%）
+- [ ] Bad Case 知识库覆盖主要错误类型（> 80%）
+
+### 扩展阅读
+
+AI 辅助测试的详细实现和效果评估，请参考：
+- [test-ai-rag-workflow 仓库](https://github.com/liuyoushan/test-ai-rag-workflow)
+- [AI 知识库设计文档](https://github.com/liuyoushan/test-ai-rag-workflow/tree/main/knowledge_base)
+- [AI Skills 定义](https://github.com/liuyoushan/test-ai-rag-workflow/tree/main/skills)
+
+***
+
 ## 相关资源
 
 - [ApeWorX 官方文档](https://docs.apeworx.io/)
 - [合约/DEX 用例清单](case_list)
 - [CEX 用例清单（28 接口 + 4 资损场景）](cex_case_list)
 - [合约源码目录](contracts/)
+- [AI 辅助测试仓库](https://github.com/liuyoushan/test-ai-rag-workflow)
 
