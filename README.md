@@ -25,6 +25,8 @@
 ```
 ape-demo/
 ├── ape-config.yaml                  # Ape 框架配置（多链网络、测试、编译器）
+├── config/                          # 环境配置模板
+│   └── config.example.yaml         # CEX API Key / base_url 等配置示例
 ├── contracts/                       # 智能合约
 │   ├── MyERC20.sol                 # RBAC 权限控制的 ERC20 代币
 │   ├── MiniSwapFactory.sol         # DEX 工厂合约
@@ -47,7 +49,8 @@ ape-demo/
 │   │   ├── polling_helper.py       # 轮询机制
 │   │   └── test_data_factory.py    # 测试数据工厂
 │   ├── api/                        # HTTP API 客户端
-│   │   └── http_client.py
+│   │   ├── http_client.py         # 通用 HTTP 客户端
+│   │   └── api_validator.py        # 接口响应校验器（状态码/字段/schema）
 │   ├── cex/                        # CEX 专属工具（与合约断言分离）
 │   │   ├── base_client.py         # HMAC-SHA256 签名基础客户端
 │   │   ├── cex_assertions.py      # CEX 专属断言
@@ -191,16 +194,16 @@ ape test -k "test_erc20_001" -v
 
 | 业务域         | 模块          | 用例数量 | 说明                        |
 | ----------- | ----------- | ---- | ------------------------- |
-| **contracts** | ERC20 基础标准  | 10   | 代币转账、授权、铸造、销毁、RBAC 权限     |
-| **contracts** | 自定义业务合约     | 10   | 权限控制、参数配置、暂停恢复、黑名单        |
-| **dex**       | DEX 去中心化交易所 | 8    | Swap、流动性添加/移除、滑点控制、手续费    |
+| **contracts** | ERC20 基础标准  | 11   | 代币转账、授权、铸造、销毁、RBAC 权限     |
+| **contracts** | 自定义业务合约     | 8    | 权限控制、参数配置、暂停恢复、黑名单        |
+| **dex**       | DEX 去中心化交易所 | 11   | Swap、流动性添加/移除、滑点控制、手续费、多跳路由 |
 | **dex**       | 清算业务        | 11   | 清算触发、流程、奖励、安全防护           |
 | **dex**       | NFT/SFT     | 10   | ERC721/ERC1155 铸造、转账、交易场景 |
-| **cex**       | CEX 资金链路    | 19   | 充币3 + 提币5 + 划转4 + 账户4 + 资损4 |
+| **cex**       | CEX 资金链路    | 19   | 充币5 + 提币6 + 划转4 + 账户4（含资损/权限场景） |
 | **cex**       | CEX 订单系统    | 9    | 现货下单/撤单/查询/撮合               |
 | **cex**       | CEX 风控体系    | 4    | API 权限、IP 白名单、冻结、大额审核      |
-| **security**  | 高阶安全场景      | 12   | 重入防护、整数溢出、授权安全、代理升级、时间锁  |
-| 合计          |             | **84+** |                           |
+| **security**  | 高阶安全场景      | 10   | 重入防护、整数溢出、授权安全、代理升级、时间锁  |
+| 合计          |             | **93** |                           |
 
 ### YAML 测试数据格式
 
