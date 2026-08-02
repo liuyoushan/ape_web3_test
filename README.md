@@ -128,8 +128,18 @@ ape plugins install solidity anvil
 
 ```bash
 # ============================================================
+# 启动主网fork
+source ./start_fork_node.sh 
+# 进入当前项目venv环境
+source .venv/bin/activate
+## 报告目录下起服务查allure的报告：
+python -m http.server 8080
+
+
 # 📦 方式一：按业务域一键运行（推荐，企业级常用）
 # ============================================================
+python3 run_tests.py -s --serve --port 8080 # 本地调试，启动 Allure 报告服务
+
 python3 run_tests.py -s --project contracts    # 合约基础层
 python3 run_tests.py -s --project dex          # DEX 业务层
 python3 run_tests.py -s --project cex          # CEX 中心化交易所
@@ -155,7 +165,7 @@ python3 run_tests.py -s tests/cex/fund/scenarios/test_account.py::test_case_001_
 # ============================================================
 # ⚙️ 其他常用参数
 # ============================================================
-python3 run_tests.py -s --network ethereum:local    # 指定网络
+python3 run_tests.py -s --network ethereum:local    # 指定网络，
 python3 run_tests.py -s --no-report                  # 不生成 Allure 报告
 python3 run_tests.py --help                          # 查看全部帮助
 python3 run_tests.py -s                          # 打印print
@@ -266,11 +276,6 @@ def test_erc20_003_insufficient_balance_transfer(erc20_token, deployer, user1):
 
 并发压测、混沌故障注入、线上全链路监控：<https://github.com/liuyoushan/blockchain-perf-test>
 
-## 报告目录下起服务查allure的报告：
-
-```
-python -m http.server 8080
-```
 
 ***
 
