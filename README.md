@@ -138,7 +138,10 @@ python -m http.server 8080
 
 # 📦 方式一：按业务域一键运行（推荐，企业级常用）
 # ============================================================
-python3 run_tests.py -s --serve --port 8080 # 本地调试，启动 Allure 报告服务
+# 本地调试，启动 Allure 报告服务
+python3 run_tests.py -s --serve --port 8080 
+# 本地调试，运行单个用例，不启动生成报告
+python3 run_tests.py tests/cex/fund/scenarios/test_account.py::test_cex_fund_001_get_balance -s  --no-report
 
 python3 run_tests.py -s --project contracts    # 合约基础层
 python3 run_tests.py -s --project dex          # DEX 业务层
