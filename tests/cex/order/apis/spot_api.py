@@ -14,40 +14,85 @@ class SpotAPI:
     def __init__(self, client: CEXBaseClient):
         self.client = client
     
+    def _build_order_params(
+        self,
+        symbol: str,
+        side: str,
+        order_type: str,
+        quantity: float = None,
+        quote_order_qty: float = None,
+        price: float = None,
+        time_in_force: str = "GTC"
+    ) -> dict:
+        """组装下单参数（币安 /api/v3/order 规则）"""
+        params = {
+            "symbol": symbol,
+            "side": side,
+            "type": order_type,
+        }
+        if quantity is not None:
+            params["quantity"] = quantity
+        # 市价买单常用 quoteOrderQty（按花多少 USDT 买），而非指定 BTC 数量
+        if quote_order_qty is not None:
+            params["quoteOrderQty"] = quote_order_qty
+        if price is not None:
+            params["price"] = price
+        if order_type == "LIMIT":
+            params["timeInForce"] = time_in_force
+        return params
+
     def place_order(
         self,
         symbol: str,
         side: str,
         order_type: str,
         quantity: float = None,
+        quote_order_qty: float = None,
         price: float = None,
         time_in_force: str = "GTC"
     ) -> dict:
         """
-        下单
-        
+        下单（真实提交）
+        币安接口：POST /api/v3/order
+
         Args:
             symbol: 交易对 (BTCUSDT)
             side: 买卖方向 (BUY/SELL)
-            order_type: 订单类型 (LIMIT/MARKET/STOP_LOSS/... )
-            quantity: 数量
+            order_type: 订单类型 (LIMIT/MARKET)
+            quantity: 数量（按 base 资产计，如 0.001 BTC）
+            quote_order_qty: 市价单按报价资产计（如花 50 USDT），与 quantity 二选一
             price: 价格（限价单必填）
             time_in_force: 生效方式 (GTC/IOC/FOK)
         """
-        log.info(f"[CEX Order] 下单: {side} {order_type} {symbol} qty={quantity} price={price}")
-        params = {
-            "symbol": symbol,
-            "side": side,
-            "type": order_type,
-        }
-        if quantity:
-            params["quantity"] = quantity
-        if price:
-            params["price"] = price
-        if order_type == "LIMIT":
-            params["timeInForce"] = time_in_force
-        
+        log.info(f"[CEX Order] 下单: {side} {order_type} {symbol} "
+                 f"qty={quantity} quoteQty={quote_order_qty} price={price}")
+        params = self._build_order_params(
+            symbol, side, order_type, quantity, quote_order_qty, price, time_in_force
+        )
         response = self.client.private_post("/api/v3/order", params=params)
+        return response.json()
+
+    def place_test_order(
+        self,
+        symbol: str,
+        side: str,
+        order_type: str,
+        quantity: float = None,
+        quote_order_qty: float = None,
+        price: float = None,
+        time_in_force: str = "GTC"
+    ) -> dict:
+        """
+        测试下单（只校验参数，不进撮合、不冻结资产）
+        币安接口：POST /api/v3/order/test
+        成功返回空 dict {}，参数非法则返回错误。
+        """
+        log.info(f"[CEX Order] 测试下单: {side} {order_type} {symbol} "
+                 f"qty={quantity} price={price}")
+        params = self._build_order_params(
+            symbol, side, order_type, quantity, quote_order_qty, price, time_in_force
+        )
+        response = self.client.private_post("/api/v3/order/test", params=params)
         return response.json()
     
     def cancel_order(self, symbol: str, order_id: str) -> dict:
@@ -118,7 +163,7 @@ class SpotAPI:
         response = self.client.private_get("/api/v3/myTrades", params=params)
         return response.json()
     
-    def cancel_all_open_orders(self, symbol: str) -> dict:
+    def cancel_all_open_orders(self, symbol: str) -> list:
         """
         撤销所有挂单
         

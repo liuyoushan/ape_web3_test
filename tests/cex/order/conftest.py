@@ -3,4 +3,5 @@ from .fixtures.cex_order_fixtures import (
     cex_client,
     spot_api,
     market_api,
+    get_balance,
 )

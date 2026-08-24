@@ -10,7 +10,7 @@ common:
   price_precision: 2
   quantity_precision: 6
 
-# ---------- 现货交易 (case_005 ~ case_012) ----------
+# ---------- 现货交易 (case_005 ~ case_015) ----------
 spot:
   case_005:
     side: "BUY"
@@ -49,6 +49,18 @@ spot:
     side: "SELL"
     type: "MARKET"
     quantity: 10.0  # 大于盘口深度，测试边界
+
+  case_013:
+    side: "BUY"
+    type: "LIMIT"
+    time_in_force: "IOC"
+    quantity: 0.001
+
+  case_014:
+    side: "BUY"
+    type: "LIMIT"
+    time_in_force: "FOK"
+    quantity: 0.001
 
 # ---------- 并发场景 (case_032) ----------
 concurrent:

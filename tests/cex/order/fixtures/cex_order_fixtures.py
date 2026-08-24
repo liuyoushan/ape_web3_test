@@ -46,3 +46,18 @@ def spot_api(cex_client):
 def market_api(cex_client):
     """行情 API 实例"""
     return MarketAPI(cex_client)
+
+
+@pytest.fixture(scope="function")
+def get_balance(cex_client):
+    """
+    查询单币种余额的辅助函数（返回 {free, locked}）
+    订单用例校验资产冻结/释放时用。
+    """
+    def _get(asset: str) -> dict:
+        resp = cex_client.private_get("/api/v3/account")
+        for b in resp.json().get("balances", []):
+            if b["asset"] == asset.upper():
+                return {"free": float(b["free"]), "locked": float(b["locked"])}
+        return {"free": 0.0, "locked": 0.0}
+    return _get
