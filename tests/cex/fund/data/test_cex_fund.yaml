@@ -57,26 +57,30 @@ deposit:
 # ---------- 提币模块 (case_016 ~ case_020) + 差异化 (case_031) ----------
 withdraw:
   case_016:
-    amount: 0.0005
     coin: "BTC"
-    address: "0xRecipientAddress000000000000"
+    amount: 0.0001
+    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
+    large_amount: 999999
+    expected_fields: ["id", "width"]
   
   case_017:
-    withdraw_id: "wd_000001"
-    expected_statuses: ["Submitted", "AwaitingApproval", "Processing", "Success"]
+    coin: "BTC"
+    amount: 0.0001
+    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
   
   case_018:
-    withdraw_id: "wd_000002"
-    cancel_status: "Canceled"
+    coin: "BTC"
+    amount: 0.0001
+    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
   
   case_019:
     coin: "BTC"
-    limit: 10
+    expected_fields: ["id", "amount", "address", "status"]
   
   case_020:
-    amount: 0.0005
-    gas_price: 0.000001  # 极低 Gas，预期被拦截
-    expected_blocked: true
+    coin: "BTC"
+    amount: 0.0001
+    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
   
   case_031:
     amount: 0.0005

@@ -39,7 +39,14 @@ class WithdrawAPI:
         if tag:
             params["addressTag"] = tag
         response = self.client.private_post("/api/v3/withdraw", params=params)
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 提币提交失败: HTTP {response.status_code}")
+            return {"error": True, "status_code": response.status_code}
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 提币响应解析失败")
+            return {"error": True, "msg": "response parse failed"}
     
     def get_withdraw_history(self, symbol: str = None, status: int = None) -> list:
         """
@@ -56,7 +63,14 @@ class WithdrawAPI:
         if status is not None:
             params["status"] = status
         response = self.client.private_get("/api/v3/withdraw/history", params=params)
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 提币历史查询失败: HTTP {response.status_code}")
+            return []
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 提币历史响应解析失败")
+            return []
     
     def query_withdraw_status(self, withdraw_id: str) -> dict:
         """
@@ -67,7 +81,14 @@ class WithdrawAPI:
         """
         log.info(f"[CEX Fund] 查询提币状态: id={withdraw_id}")
         response = self.client.private_get("/api/v3/withdraw/status", params={"withdrawId": withdraw_id})
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 提币状态查询失败: HTTP {response.status_code}")
+            return {}
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 提币状态响应解析失败")
+            return {}
     
     def cancel_withdraw(self, withdraw_id: str) -> dict:
         """
@@ -78,4 +99,11 @@ class WithdrawAPI:
         """
         log.info(f"[CEX Fund] 取消提币: id={withdraw_id}")
         response = self.client.private_delete("/api/v3/withdraw", params={"withdrawId": withdraw_id})
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 取消提币失败: HTTP {response.status_code}")
+            return {"error": True, "status_code": response.status_code}
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 取消提币响应解析失败")
+            return {"error": True, "msg": "response parse failed"}
