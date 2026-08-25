@@ -1,3 +1,15 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python.languageServer": "Pylance",
+    "python.analysis.indexing": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.autoSearchPaths": true,
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": false,
+        "strings": false
+    },
+    "python.analysis.useStubFiles": true
 }
