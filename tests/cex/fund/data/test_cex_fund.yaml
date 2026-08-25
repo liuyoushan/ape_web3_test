@@ -32,16 +32,17 @@ account:
 deposit:
   case_013:
     coin: "BTC"
-    status: "Success"
+    expected_fields: ["txId", "amount", "coin", "status", "insertTime"]
   
   case_014:
     coin: "BTC"
-    address_format: "0x..."
-    min_length: 42
+    address_prefix: ["1", "3", "bc1"]
   
   case_015:
-    tx_hash: "0xabc123def456"
-    expected_status: "Confirmed"
+    tx_hash: "0xabc123def456789"
+    amount: 0.001
+    address: "0xTestAddress000000000000000000000000"
+    confirmations: 10
   
   case_029:
     amount: 0.001

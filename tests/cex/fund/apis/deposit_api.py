@@ -29,7 +29,14 @@ class DepositAPI:
         if status is not None:
             params["status"] = status
         response = self.client.private_get("/api/v3/deposit/history", params=params)
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 充值历史查询失败: HTTP {response.status_code}")
+            return []
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 充值历史响应解析失败")
+            return []
     
     def get_deposit_address(self, symbol: str) -> dict:
         """
@@ -40,7 +47,14 @@ class DepositAPI:
         """
         log.info(f"[CEX Fund] 获取充值地址: {symbol}")
         response = self.client.private_get("/api/v3/deposit/address", params={"coin": symbol})
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 获取充值地址失败: HTTP {response.status_code}")
+            return {}
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 充值地址响应解析失败")
+            return {}
     
     def query_deposit_status(self, tx_hash: str) -> dict:
         """
@@ -51,4 +65,11 @@ class DepositAPI:
         """
         log.info(f"[CEX Fund] 查询充值状态: tx={tx_hash[:10]}...")
         response = self.client.private_get("/api/v3/deposit/status", params={"txHash": tx_hash})
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 充值状态查询失败: HTTP {response.status_code}")
+            return {}
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 充值状态响应解析失败")
+            return {}
