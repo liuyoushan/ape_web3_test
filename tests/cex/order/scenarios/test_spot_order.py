@@ -3,7 +3,7 @@
 【CEX 现货交易模块】接口测试（对齐币安测试网 testnet.binance.vision）
 ==============================================================================
 case_005 ~ case_012：现货核心交易接口
-case_032：差异化并发场景（简历亮点）
+case_030：差异化并发场景（简历亮点）
 
 ⚠️ 说明：本模块会真实下单/撤单。所有限价单价格远离市价，保证不成交，
 用例末尾统一撤单清理，不残留挂单、不消耗资产。
@@ -335,8 +335,8 @@ def test_cex_order_014_fok_limit(spot_api, market_api, get_balance, cex_order_te
 @pytest.mark.CEX_Order
 @pytest.mark.Trade
 @pytest.mark.P1
-def test_cex_order_032_concurrent_orders(spot_api, cex_order_test_data):
-    """case_032: 并发下单不丢单 - 高并发下不丢单、资金安全"""
-    log.step("case_032: 并发下单不丢单测试")
+def test_cex_order_034_concurrent_orders(spot_api, cex_order_test_data):
+    """case_034: 并发下单不丢单 - 高并发下不丢单、资金安全"""
+    log.step("case_034: 并发下单不丢单测试")
     # TODO: 多线程并发下单 → 验证不丢单、资金无错乱
     pass

@@ -62,9 +62,9 @@ spot:
     time_in_force: "FOK"
     quantity: 0.001
 
-# ---------- 并发场景 (case_032) ----------
+# ---------- 并发场景 (case_030) ----------
 concurrent:
-  case_032:
+  case_030:
     order_count: 50
     accounts_count: 5
     price_range:

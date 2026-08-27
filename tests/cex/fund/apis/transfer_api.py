@@ -29,9 +29,15 @@ class TransferAPI:
             "amount": amount,
             "type": side,  # 1: 现货→合约, 2: 合约→现货
         }
-        # Binance 使用 /sapi/v1/futures/transfer
         response = self.client.private_post("/sapi/v1/futures/transfer", params=params)
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 划转失败: HTTP {response.status_code}")
+            return {"error": True, "status_code": response.status_code}
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 划转响应解析失败（可能返回非JSON）")
+            return {"error": True, "msg": "response is not JSON"}
     
     def spot_to_margin(self, symbol: str, amount: float, side: int = 1) -> dict:
         """
@@ -49,7 +55,14 @@ class TransferAPI:
             "type": side,
         }
         response = self.client.private_post("/sapi/v1/margin/transfer", params=params)
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 杠杆划转失败: HTTP {response.status_code}")
+            return {"error": True, "status_code": response.status_code}
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 杠杆划转响应解析失败")
+            return {"error": True, "msg": "response is not JSON"}
     
     def get_transfer_history(self, symbol: str = None) -> list:
         """
@@ -63,4 +76,11 @@ class TransferAPI:
         if symbol:
             params["asset"] = symbol
         response = self.client.private_get("/sapi/v1/futures/transfer", params=params)
-        return response.json()
+        if response.status_code != 200:
+            log.warning(f"[CEX Fund] 划转历史查询失败: HTTP {response.status_code}")
+            return []
+        try:
+            return response.json()
+        except Exception:
+            log.warning("[CEX Fund] 划转历史响应解析失败")
+            return []

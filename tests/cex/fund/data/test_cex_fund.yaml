@@ -1,5 +1,5 @@
 # ==============================================================================
-# CEX 资金链路测试数据（32 用例精简版）
+# CEX 资金链路测试数据
 # ==============================================================================
 
 # 通用配置
@@ -28,84 +28,89 @@ account:
   case_004:
     verify_fields: ["totalWalletBalance", "totalUnrealizedProfit", "totalMarginBalance"]
 
-# ---------- 充币模块 (case_013 ~ case_015) + 差异化 (case_029, case_030) ----------
+# ---------- 充币模块 (case_015 ~ case_017) ----------
 deposit:
-  case_013:
+  case_015:
     coin: "BTC"
     expected_fields: ["txId", "amount", "coin", "status", "insertTime"]
   
-  case_014:
+  case_016:
     coin: "BTC"
     address_prefix: ["1", "3", "bc1"]
   
-  case_015:
+  case_017:
     tx_hash: "0xabc123def456789"
     amount: 0.001
     address: "0xTestAddress000000000000000000000000"
     confirmations: 10
-  
-  case_029:
-    amount: 0.001
-    rollback_block: 100
-    expected_balance_delta: -0.001
-  
-  case_030:
-    amount: 0.001
-    tx_hash: "0xduplicate789"
-    duplicate_count: 2
 
-# ---------- 提币模块 (case_016 ~ case_020) + 差异化 (case_031) ----------
+# ---------- 提币模块 (case_018 ~ case_022) ----------
 withdraw:
-  case_016:
-    coin: "BTC"
-    amount: 0.0001
-    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
-    large_amount: 999999
-    expected_fields: ["id", "width"]
-  
-  case_017:
-    coin: "BTC"
-    amount: 0.0001
-    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
-  
   case_018:
     coin: "BTC"
     amount: 0.0001
     address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
+    large_amount: 999999
   
   case_019:
     coin: "BTC"
-    expected_fields: ["id", "amount", "address", "status"]
+    amount: 0.0001
+    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
   
   case_020:
     coin: "BTC"
     amount: 0.0001
     address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
   
+  case_021:
+    coin: "BTC"
+    expected_fields: ["id", "amount", "address", "status"]
+  
+  case_022:
+    coin: "BTC"
+    amount: 0.0001
+    address: "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx"
+
+# ---------- 划转模块 (case_023 ~ case_026) ----------
+transfer:
+  case_023:
+    asset: "USDT"
+    amount: 1.0
+  
+  case_024:
+    asset: "USDT"
+    amount: 1.0
+  
+  case_025:
+    asset: "USDT"
+    expected_fields: ["timestamp", "asset", "quantity", "type"]
+  
+  case_026:
+    asset: "USDT"
+    amount: 1.0
+    tolerance: 1e-8
+
+# ---------- 差异化资损场景 (case_027 ~ case_030) ----------
+differentiated:
   case_031:
+    amount: 0.001
+    rollback_block: 100
+    expected_balance_delta: -0.001
+  
+  case_032:
+    amount: 0.001
+    tx_hash: "0xduplicate789"
+    duplicate_count: 2
+  
+  case_033:
     amount: 0.0005
     chain_fail_reason: "network_timeout"
     expected_refund: true
-
-# ---------- 划转模块 (case_021 ~ case_024) ----------
-transfer:
-  case_021:
-    asset: "BTC"
-    amount: 0.0001
-    from_account: "SPOT"
-    to_account: "FUTURES"
   
-  case_022:
-    asset: "BTC"
-    amount: 0.0001
-    from_account: "FUTURES"
-    to_account: "SPOT"
-  
-  case_023:
-    asset: "USDT"
-    limit: 10
-  
-  case_024:
-    asset: "BTC"
-    amount: 0.0001
-    tolerance: 1e-8
+  case_034:
+    order_count: 50
+    accounts_count: 5
+    price_range:
+      min: 49000.00
+      max: 51000.00
+    max_concurrent_per_account: 20
