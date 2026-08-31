@@ -1,32 +1,42 @@
 # ==============================================================================
-# CEX 风控体系测试数据（32 用例精简版）
+# CEX 风控体系测试数据
 # ==============================================================================
 
-# 通用配置
 common:
   risk_log_retention_days: 365
 
-# ---------- 风控核心接口 (case_025 ~ case_028) ----------
 risk:
-  case_025:
+  # case_027: API Key分级权限
+  case_027:
     key_types: ["READONLY", "TRADE", "WITHDRAW"]
     expected_blocked:
       READONLY: ["TRADE", "WITHDRAW"]
       TRADE: ["WITHDRAW"]
-  
-  case_026:
+    # 测试网通过 account 接口的 canTrade/canWithdraw/canDeposit 标志位验证
+    permission_flags:
+      - "canTrade"
+      - "canWithdraw"
+      - "canDeposit"
+
+  # case_028: IP白名单拦截
+  case_028:
     whitelist_ips:
       - "192.168.1.100"
       - "10.0.0.1"
     blocked_ip: "203.0.113.5"
-  
-  case_027:
+    # 测试网不支持 whitelist 接口，仅验证接口返回格式
+
+  # case_029: 系统自动冻结
+  case_029:
     freeze_triggers:
       - "abnormal_trade_pattern"
       - "blacklist_address_transfer"
     expected_blocked_actions: ["withdraw", "transfer"]
-  
-  case_028:
-    threshold_large: 100000  # 超阈值触发审核
-    split_detect: 50000       # 拆分识别
+    # 测试网不支持 freeze/unfreeze 接口，仅验证接口返回格式
+
+  # case_030: 大额交易自动审核
+  case_030:
+    threshold_large: 100000  # 超阈值触发审核（USDT）
+    split_detect: 50000       # 拆分识别阈值
     audit_timeout_hours: 48
+    # 测试网无真实审核流，通过余额一致性验证逻辑正确性
