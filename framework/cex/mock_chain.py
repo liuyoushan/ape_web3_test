@@ -219,10 +219,10 @@ class MockChainSimulator:
     def simulate_duplicate_deposit(self, tx_hash: str) -> ChainSimulation:
         """
         模拟同一 TxHash 重复充值请求
-        
+
         场景：用户/攻击者重复提交同一笔充值请求
         测试点：交易所防重复入账机制是否生效
-        
+
         Args:
             tx_hash: 已充值的交易哈希
         """
@@ -232,20 +232,19 @@ class MockChainSimulator:
                 success=False,
                 message=f"充值记录不存在: {tx_hash}"
             )
-        
+
         record = self._deposits[tx_hash]
-        
+
         if record.status == DepositStatus.ROLLED_BACK:
             return ChainSimulation(
                 event=ChainEvent.DUPLICATE_TX,
                 success=False,
                 message=f"该交易已回滚，不是重复入账场景"
             )
-        
-        # 触发重复标记
+
+        # 触发重复标记（不改变原始充值状态，仅标记该 tx_hash 为重复请求）
         self._duplicate_tx_hashes.add(tx_hash)
-        record.status = DepositStatus.DUPLICATE
-        
+
         simulation = ChainSimulation(
             event=ChainEvent.DUPLICATE_TX,
             success=True,
@@ -253,11 +252,11 @@ class MockChainSimulator:
             data={
                 "tx_hash": tx_hash,
                 "amount": record.amount,
-                "previous_status": DepositStatus.CONFIRMED.value,
+                "previous_status": record.status.value,
                 "should_block_credit": True,  # 交易所应拒绝此次入账
             }
         )
-        
+
         self._simulation_log.append(simulation)
         log.warning(f"[MockChain] 重复充值: {simulation.message} ⚠️ 交易所应拒绝此次入账")
         return simulation
@@ -504,25 +503,24 @@ class MockChainSimulator:
     
     def calculate_net_deposits(self) -> float:
         """
-        计算净充值额（已确认 - 已回滚）
-        
+        计算净充值额（仅已确认，已回滚的不计入）
+
         用于验证：交易所内部余额 vs 链上实际净充值额
+        已回滚的充值不应计入净额，因为交易所会扣回已入账资金。
         """
-        confirmed = sum(r.amount for r in self._deposits.values() 
+        confirmed = sum(r.amount for r in self._deposits.values()
                        if r.status == DepositStatus.CONFIRMED)
-        rolled_back = sum(r.amount for r in self._deposits.values() 
-                         if r.status == DepositStatus.ROLLED_BACK)
-        return confirmed - rolled_back
-    
+        return confirmed
+
     def calculate_net_withdraws(self) -> float:
         """
-        计算净提币额（已完成 - 已失败/回滚）
+        计算净提币额（仅已完成，已失败/回滚的不计入）
+
+        已失败/回滚的提币不应计入净额，因为交易所会退回扣减的资金。
         """
-        confirmed = sum(r.amount for r in self._withdraws.values() 
+        confirmed = sum(r.amount for r in self._withdraws.values()
                        if r.status == WithdrawStatus.CONFIRMED)
-        failed = sum(r.amount for r in self._withdraws.values() 
-                    if r.status in [WithdrawStatus.FAILED, WithdrawStatus.ROLLED_BACK])
-        return confirmed - failed
+        return confirmed
     
     def verify_balance_consistency(self, internal_balance: float) -> Dict[str, Any]:
         """

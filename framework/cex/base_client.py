@@ -47,7 +47,7 @@ class CEXBaseClient:
         api_secret: str,
         base_url: str,
         timeout: float = 30.0,
-        recv_window: int = 5000
+        recv_window: int = 10000
     ):
         self.api_key = api_key
         self.api_secret = api_secret
