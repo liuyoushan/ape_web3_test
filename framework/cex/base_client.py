@@ -62,6 +62,7 @@ class CEXBaseClient:
         })
         
         self.retry_helper = RetryHelper(max_retries=3, delay=1.0)
+        self._sync_server_time()
     
     def _generate_signature(self, query_string: str) -> str:
         """生成 HMAC-SHA256 签名"""
@@ -71,9 +72,26 @@ class CEXBaseClient:
             hashlib.sha256
         ).hexdigest()
     
+    def _sync_server_time(self):
+        """同步本地时钟与交易所服务器时间，消除时间偏差"""
+        try:
+            url = f"{self.base_url}/api/v3/time"
+            resp = self.session.get(url, timeout=self.timeout)
+            if resp.status_code == 200:
+                server_time = resp.json().get("serverTime")
+                local_time = int(time.time() * 1000)
+                self._time_offset = server_time - local_time
+                log.debug(f"[CEX] 时钟同步: 偏差={self._time_offset}ms")
+            else:
+                self._time_offset = 0
+                log.warning(f"[CEX] 时钟同步失败: HTTP {resp.status_code}")
+        except Exception as e:
+            self._time_offset = 0
+            log.warning(f"[CEX] 时钟同步异常: {e}")
+
     def _get_timestamp(self) -> int:
-        """获取当前时间戳（毫秒）"""
-        return int(time.time() * 1000)
+        """获取经服务器时间校准的当前时间戳（毫秒）"""
+        return int(time.time() * 1000) + getattr(self, '_time_offset', 0)
     
     def _build_signed_params(self, params: Optional[Dict] = None) -> Dict:
         """构建签名参数（含时间戳、窗口、签名）"""
