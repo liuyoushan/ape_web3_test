@@ -45,12 +45,12 @@ def test_liquidation_048_trigger(liquidation_env, user1, deployer):
     collateral_token.approve(api.contract, env["collateral_amount"], sender=user1)
     log.debug(f"用户1授权清算合约使用抵押品: {format_ether(env['collateral_amount'])}")
     api.deposit_collateral("2000", user1)
-    collateral_balance = api.get_collateral(user1)
+    collateral_balance = api.get_collateral_balance(user1)
     log.debug(f"用户1抵押品余额: {format_ether(collateral_balance)}")
     
     log.info("步骤2: 用户借入债务")
     api.borrow("1000", user1)
-    debt_balance = api.get_debt(user1)
+    debt_balance = api.get_debt_balance(user1)
     log.debug(f"用户1债务余额: {format_ether(debt_balance)}")
     
     log.info("步骤3: 验证健康因子")

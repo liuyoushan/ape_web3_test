@@ -160,9 +160,9 @@ def test_security_028_staking_mining(deployer, user1, user2, erc20_token, stakin
 
     # 质押
     log.info("步骤1: 用户1质押")
-    erc20_token.mint(user1, stake_amount, sender=deployer)
+    reward_token.mint(user1, stake_amount, sender=deployer)
     log.debug(f"用户1获得质押代币: {format_ether(stake_amount)}")
-    erc20_token.approve(staking.address, stake_amount, sender=user1)
+    reward_token.approve(staking.address, stake_amount, sender=user1)
     staking.stake(stake_amount, sender=user1)
     stake_balance = staking.userInfo(user1)[0]
     log.debug(f"用户1质押余额: {format_ether(stake_balance)}")
@@ -171,14 +171,14 @@ def test_security_028_staking_mining(deployer, user1, user2, erc20_token, stakin
 
     # 用户2质押触发奖励计算
     log.info("步骤2: 用户2质押触发奖励计算")
-    erc20_token.mint(user2, stake_amount, sender=deployer)
-    erc20_token.approve(staking.address, stake_amount, sender=user2)
+    reward_token.mint(user2, stake_amount, sender=deployer)
+    reward_token.approve(staking.address, stake_amount, sender=user2)
     staking.stake(stake_amount, sender=user2)
     log.debug("用户2质押完成，触发区块奖励计算")
 
     # 验证有待领取奖励
     log.info("步骤3: 验证有待领取奖励")
-    pending_reward = staking.pendingReward(user1.address)
+    pending_reward = staking.pendingReward(user1)
     log.debug(f"用户1待领取奖励: {format_ether(pending_reward)}")
     assert pending_reward > 0, "用户1应有待领取奖励"
     log.debug("待领取奖励验证通过")

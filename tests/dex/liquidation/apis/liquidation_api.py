@@ -120,7 +120,7 @@ class LiquidationAPI:
         Returns:
             int: 抵押资产余额（wei）
         """
-        return self.contract.collateralBalance(user)
+        return self.contract.userCollateral(user)
 
     def get_debt_balance(self, user) -> int:
         """
@@ -132,4 +132,4 @@ class LiquidationAPI:
         Returns:
             int: 债务余额（wei）
         """
-        return self.contract.debtBalance(user)
+        return self.contract.userDebt(user)
