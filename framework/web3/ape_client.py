@@ -257,5 +257,13 @@ class ApeClient:
         return events
 
 
-# 全局 Ape 客户端
-ape_client = ApeClient()
+# 全局 Ape 客户端（延迟初始化，避免未安装时导入崩溃）
+_ape_client = None
+
+
+def get_ape_client() -> ApeClient:
+    """获取全局 Ape 客户端实例（延迟初始化）"""
+    global _ape_client
+    if _ape_client is None:
+        _ape_client = ApeClient()
+    return _ape_client

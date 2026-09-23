@@ -86,17 +86,15 @@ class LiquidationAPI:
         amount = parse_ether(amount_ether)
         return self.contract.withdrawCollateral(amount, sender=sender)
 
-    def liquidate(self, borrower, amount_ether: str, sender):
+    def liquidate(self, borrower, sender):
         """
         执行清算
         
         Args:
             borrower: 被清算的借款人地址
-            amount_ether: 清算金额（ether字符串）
             sender: 清算人账户
         """
-        amount = parse_ether(amount_ether)
-        return self.contract.liquidate(borrower, amount, sender=sender)
+        return self.contract.liquidate(borrower, sender=sender)
 
     def get_health_factor(self, user) -> int:
         """
