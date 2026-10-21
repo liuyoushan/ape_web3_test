@@ -96,6 +96,18 @@ Tests use `@allure.title()`, `@allure.description()`, `@allure.tag()` decorators
 - Several wallet APIs (`/sapi/v1/*`) return 404 on testnet — tests using these are marked `@pytest.mark.skip`
 - `CEX_BASE_URL` in `.env` controls the target
 - CEX fixtures use `scope="function"` (fresh client per test), unlike contract fixtures which use `scope="module"`
+- `tests/cex/conftest.py` auto-skips the whole CEX module when `CEX_API_KEY`/`CEX_API_SECRET` are unset (CI default). Add them as GitHub secrets to run CEX in CI.
+
+## Dependency Pinning (Important)
+
+`requirements.txt` pins the Ape stack on purpose:
+- `web3==7.16.0` removed `web3.middleware.geth_poa_middleware`
+- `ape-alchemy<0.8.10` hard-imports that symbol → ImportError at provider load
+- Unpinned `>=` previously broke CI (`ape run deploy` exit 1, pytest exit 2)
+- Before bumping versions, verify locally: `ape compile`, `ape run deploy --network ethereum:local`, `pytest --collect-only -q`
+- Test placeholders must call `pytest.skip(...)`, not `raise NotImplementedError` (otherwise CI fails)
+- `ape-config.yaml` compiler settings use the plugin-name section `solidity:` (`version`, `optimize`, `optimization_runs`). The old `compiler.solc.*` block is silently ignored by ape 0.8+
+- CI caches pip and `~/.solcx`; bump the solc cache key when changing `solidity.version`
 
 ## Environment
 

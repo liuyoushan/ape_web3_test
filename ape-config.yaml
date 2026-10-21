@@ -22,9 +22,10 @@ test:
   mnemonic: "test test test test test test test test test test test junk"
   number_of_accounts: 20
 
-compiler:
-  solc:
-    version: "0.8.20"
-    optimizer:
-      enabled: true
-      runs: 1000000
+# 注意：ape 0.8+ 使用插件名作为配置段（solidity:），
+# 旧写法 compiler.solc.* 不会生效（会被静默忽略）。
+# contracts 使用 ^0.8.20 pragma，0.8.35 兼容且为当前已验证版本。
+solidity:
+  version: "0.8.35"
+  optimize: true
+  optimization_runs: 1000000

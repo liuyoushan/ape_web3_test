@@ -26,6 +26,13 @@ on:
 jobs:
   ape_verify:
     runs-on: ubuntu-latest
+    # CEX 用例需要币安测试网密钥；未配置 secrets 时 conftest 会自动跳过 CEX 用例
+    env:
+      CEX_API_KEY: ${{ secrets.CEX_API_KEY }}
+      CEX_API_SECRET: ${{ secrets.CEX_API_SECRET }}
+      CEX_BASE_URL: https://testnet.binance.vision
+      # 可选：配置 secrets.FORK_RPC_URL 可替换公开 RPC（公开 RPC 可能限流）
+      FORK_RPC_URL: ${{ secrets.FORK_RPC_URL || 'https://eth.drpc.org' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,11 +41,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Install Ape & Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          # 提前暴露依赖冲突（不阻塞，仅告警）
+          pip check || true
+
+      - name: Cache solc compiler
+        uses: actions/cache@v4
+        with:
+          path: ~/.solcx
+          key: solc-${{ runner.os }}-0.8.35
 
       - name: Compile all contracts
         run: ape compile
@@ -68,7 +85,7 @@ jobs:
       - name: Start Anvil fork node
         run: |
           anvil \
-            --fork-url "https://eth.drpc.org" \
+            --fork-url "$FORK_RPC_URL" \
             --fork-block-number 19500000 \
             --chain-id 1 \
             --balance 100000 \

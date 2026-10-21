@@ -3,6 +3,8 @@
 【NFT场景】完整NFT测试用例
 ==============================================================================
 """
+
+import pytest
 try:
     import allure
 except ImportError:
@@ -32,7 +34,7 @@ def test_nft_036_erc721_metadata(deployer):
     - totalSupply: NFT 总发行量
     - 每枚 NFT 有唯一 TokenId
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 037 nft limited mint")
@@ -48,7 +50,7 @@ def test_nft_037_nft_limited_mint(deployer, user1):
     - 最大发行量限制
     - 超额铸造被拦截
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 038 nft transfer")
@@ -64,7 +66,7 @@ def test_nft_038_nft_transfer(deployer, user1):
     - 接收者获得持有权
     - Transfer 事件触发
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 039 erc721 approval")
@@ -80,7 +82,7 @@ def test_nft_039_erc721_approval(deployer, user1):
     - approvedAddress 正确记录
     - 授权可撤销
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 040 nft burn")
@@ -96,7 +98,7 @@ def test_nft_040_nft_burn(deployer, user1):
     - totalSupply 减少
     - Transfer 事件至 address(0)
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 041 erc1155 basic")
@@ -112,7 +114,7 @@ def test_nft_041_erc1155_basic(deployer):
     - balanceOf 正确返回数量
     - 不同 TokenId 独立管理
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 042 sft batch transfer")
@@ -128,7 +130,7 @@ def test_nft_042_sft_batch_transfer(deployer, user1):
     - 接收者数量正确增加
     - 数据一致性校验
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 043 game item trade")
@@ -144,7 +146,7 @@ def test_nft_043_game_item_trade(deployer, user1):
     - 资产扣减正确
     - 交割完整性
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 044 sft benefit control")
@@ -160,7 +162,7 @@ def test_nft_044_sft_benefit_control(deployer, user1):
     - 游戏 Buff 生效
     - 权益与持有状态绑定
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")
 
 
 @allure.title("nft 045 onchain offchain consistency")
@@ -176,4 +178,4 @@ def test_nft_045_onchain_offchain_consistency(deployer):
     - 权益信息同步
     - 图片 URI 可访问
     """
-    raise NotImplementedError("用例待实现")
+    pytest.skip("用例待实现")

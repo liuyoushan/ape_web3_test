@@ -3,6 +3,8 @@
 【清算场景】完整清算测试用例
 ==============================================================================
 """
+
+import pytest
 try:
     import allure
 except ImportError:
@@ -351,7 +353,7 @@ def test_liquidation_051_non_liquidation_condition_reject(deployer, user1, liqui
     - 当用户健康因子正常时，清算操作被拒绝
     - 保护用户免受恶意清算
     """
-    raise NotImplementedError("case_051 待实现")
+    pytest.skip("case_051 待实现")
 
 
 @allure.title("case_052 清算奖励计算测试")
@@ -366,7 +368,7 @@ def test_liquidation_052_liquidation_reward_calculation(deployer, user1, user2, 
     - 借款人承担合理的清算罚金
     - 计算精度和边界条件正确
     """
-    raise NotImplementedError("case_052 待实现")
+    pytest.skip("case_052 待实现")
 
 
 @allure.title("case_053 批量清算场景测试")
@@ -381,7 +383,7 @@ def test_liquidation_053_batch_liquidation_scenario(deployer, user1, user2, user
     - 系统性能和状态一致性
     - 并发清算时的资源分配
     """
-    raise NotImplementedError("case_053 待实现")
+    pytest.skip("case_053 待实现")
 
 
 @allure.title("case_054 价格预言机操纵边界测试")
@@ -395,7 +397,7 @@ def test_liquidation_054_price_oracle_manipulation_boundary(deployer, user1, liq
     - 防止预言机价格被操纵导致恶意清算
     - 价格偏差检测和保护
     """
-    raise NotImplementedError("case_054 待实现")
+    pytest.skip("case_054 待实现")
 
 
 @allure.title("case_058 漏洞合约攻击测试")
