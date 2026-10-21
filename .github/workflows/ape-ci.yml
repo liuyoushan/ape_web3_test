@@ -108,12 +108,7 @@ jobs:
           npm install -g allure-commandline
 
       - name: Execute all pytest test cases
-        run: python run_tests.py --no-report
-
-      - name: Generate Allure report
-        if: always()
-        run: python run_tests.py --no-clean
-        continue-on-error: true
+        run: python run_tests.py
 
       - name: Upload Allure Report
         uses: actions/upload-artifact@v4

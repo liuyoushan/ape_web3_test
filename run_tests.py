@@ -186,8 +186,8 @@ def get_python_path() -> str:
         log_info("使用当前 Python 环境")
         return sys.executable
     
-    log_warning("未检测到虚拟环境，使用系统 Python")
-    return "python3"
+    log_warning("未检测到虚拟环境，使用当前 Python 解释器")
+    return sys.executable
 
 # ==================== 检查 allure-pytest 是否安装 ====================
 def has_allure_pytest(python_path: str) -> bool:
@@ -573,10 +573,11 @@ def main():
     )
     
     parser.add_argument(
-        "-c", "--clean",
-        action="store_true",
+        "--no-clean",
+        dest="clean",
+        action="store_false",
         default=True,
-        help="运行前清理缓存"
+        help="运行前不清理缓存（保留历史报告）"
     )
     
     parser.add_argument(
