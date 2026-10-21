@@ -49,6 +49,21 @@ class CEXBaseClient:
         timeout: float = 30.0,
         recv_window: int = 10000
     ):
+        # 清洗密钥：去掉首尾空白/换行以及误粘贴的成对引号
+        # （GitHub Secrets 里粘贴时常见换行或 "..."，会导致 requests InvalidHeader
+        #   或 HMAC 签名不匹配）
+        def _clean_credential(value: str) -> str:
+            value = (value or "").strip()
+            while len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                value = value[1:-1].strip()
+            return value
+
+        raw_key, raw_secret = api_key, api_secret
+        api_key = _clean_credential(api_key)
+        api_secret = _clean_credential(api_secret)
+        if api_key != (raw_key or "") or api_secret != (raw_secret or ""):
+            log.warning("[CEX] 检测到 API Key/Secret 含多余空白或引号，已自动清洗")
+
         self.api_key = api_key
         self.api_secret = api_secret
         self.base_url = base_url
